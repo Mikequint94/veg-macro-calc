@@ -249,20 +249,34 @@
             <section class="lg:col-span-5 flex flex-col gap-6">
 
                 <!-- Profile & TDEE Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden">
-                    <div class="px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between">
+                <div id="profile-card" class="bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden">
+                    <div class="px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
                             <i class="fa-solid fa-sliders text-emerald-400"></i>
                             <h2 class="font-bold text-base">Body Metrics & TDEE Engine</h2>
                         </div>
-                        <!-- Unit Toggle -->
-                        <div class="inline-flex rounded-lg bg-slate-700/80 p-0.5 text-xs font-semibold">
-                            <button id="unit-imperial-btn" onclick="setUnitSystem('imperial')" class="px-2.5 py-1 rounded-md transition bg-emerald-500 text-white">Imperial (lb/ft)</button>
-                            <button id="unit-metric-btn" onclick="setUnitSystem('metric')" class="px-2.5 py-1 rounded-md transition text-slate-300 hover:text-white">Metric (kg/cm)</button>
+                        <div class="flex items-center gap-2">
+                            <!-- Unit Toggle -->
+                            <div id="unit-toggle-group" class="inline-flex rounded-lg bg-slate-700/80 p-0.5 text-xs font-semibold">
+                                <button id="unit-imperial-btn" onclick="setUnitSystem('imperial')" class="px-2.5 py-1 rounded-md transition bg-emerald-500 text-white">Imperial (lb/ft)</button>
+                                <button id="unit-metric-btn" onclick="setUnitSystem('metric')" class="px-2.5 py-1 rounded-md transition text-slate-300 hover:text-white">Metric (kg/cm)</button>
+                            </div>
+                            <button id="profile-toggle-btn" onclick="toggleProfileCard()" class="px-2.5 py-1 rounded-lg bg-slate-700/80 hover:bg-slate-600 text-xs font-semibold transition flex items-center gap-1.5">
+                                <i id="profile-toggle-icon" class="fa-solid fa-pen text-[10px]"></i> <span id="profile-toggle-label">Edit</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="p-5 space-y-4">
+                    <!-- Collapsed Summary (shown after onboarding) -->
+                    <button id="profile-summary" onclick="toggleProfileCard()" class="hidden w-full text-left px-5 py-3 hover:bg-slate-50 transition flex items-center justify-between gap-3">
+                        <div id="profile-summary-text" class="text-xs text-slate-600 font-medium leading-relaxed"></div>
+                        <div class="text-right shrink-0">
+                            <div id="profile-summary-kcal" class="text-base font-extrabold text-emerald-700"></div>
+                            <div class="text-[10px] text-slate-400 font-medium">kcal / day</div>
+                        </div>
+                    </button>
+
+                    <div id="profile-card-body" class="p-5 space-y-4">
                         <!-- Biological Sex & Age -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
@@ -694,6 +708,7 @@
                         <!-- 7 Pure Vegetarian Category Pills -->
                         <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
                             <button onclick="setFoodCategory('All')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="All">All Foods</button>
+                            <button onclick="setFoodCategory('Recent')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="Recent">🕒 Recent</button>
                             <button onclick="setFoodCategory('PlantPro')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="PlantPro">🌱 Plant Bases (Tofu/Seitan/TVP)</button>
                             <button onclick="setFoodCategory('DairyEggs')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="DairyEggs">🧀 Dairy & Eggs</button>
                             <button onclick="setFoodCategory('Legumes')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="Legumes">🫘 Legumes & Pulses</button>
@@ -701,6 +716,7 @@
                             <button onclick="setFoodCategory('Produce')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="Produce">🥦 Vegetables & Produce</button>
                             <button onclick="setFoodCategory('FatsSeeds')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="FatsSeeds">🥑 Nuts, Seeds & Fats</button>
                             <button onclick="setFoodCategory('MealPrep')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="MealPrep">🥗 Meal Prep Dishes</button>
+                            <button onclick="setFoodCategory('Snacks')" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold transition whitespace-nowrap" data-cat="Snacks">🍿 Snacks, Sweets & Drinks</button>
                         </div>
 
                         <!-- Scrollable Food Database List -->
@@ -736,7 +752,10 @@
                 <div class="grid grid-cols-3 gap-3">
                     <div class="col-span-2">
                         <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Food / Meal Name *</label>
-                        <input id="cf-name" type="text" required placeholder="e.g., Homemade Turkey Chili" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium">
+                        <div class="flex gap-1.5">
+                            <input id="cf-emoji" type="text" maxlength="8" value="🍽️" oninput="this.dataset.manual = '1'" aria-label="Food emoji" title="Auto-picked from the name. Tap to type your own." class="w-11 shrink-0 px-1 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-base text-center">
+                            <input id="cf-name" type="text" required placeholder="e.g., Bean & Cheese Burrito" oninput="autoPickCustomEmoji()" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Add to Meal</label>
@@ -789,6 +808,20 @@
                     </div>
                 </div>
 
+                <div>
+                    <label for="cf-category" class="block text-xs font-semibold uppercase text-slate-500 mb-1">Category</label>
+                    <select id="cf-category" onchange="autoPickCustomEmoji()" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-semibold">
+                        <option value="MealPrep">🥗 Meal Prep Dishes</option>
+                        <option value="PlantPro">🌱 Plant Bases (Tofu/Seitan/TVP)</option>
+                        <option value="DairyEggs">🧀 Dairy & Eggs</option>
+                        <option value="Legumes">🫘 Legumes & Pulses</option>
+                        <option value="Grains">🍚 Grains & Complex Carbs</option>
+                        <option value="Produce">🥦 Vegetables & Produce</option>
+                        <option value="FatsSeeds">🥑 Nuts, Seeds & Fats</option>
+                        <option value="Snacks">🍿 Snacks, Sweets & Drinks</option>
+                    </select>
+                </div>
+
                 <div class="flex items-center gap-2">
                     <input id="cf-save-db" type="checkbox" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
                     <label for="cf-save-db" class="text-xs font-medium text-slate-700">Save to my custom vegetarian food library for future logging</label>
@@ -836,6 +869,71 @@
 
             <div class="flex items-center justify-end gap-2 mt-5">
                 <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- First-Run Onboarding Modal -->
+    <div id="onboarding-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/70 backdrop-blur-xs flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in my-auto">
+            <div class="px-5 py-4 bg-gradient-to-r from-emerald-700 to-green-800 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+                            <i class="fa-solid fa-seedling"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-base leading-tight">Welcome to NutriPulse</h3>
+                            <p id="onboarding-subtitle" class="text-[11px] text-emerald-100">Let's set your daily calorie & macro targets</p>
+                        </div>
+                    </div>
+                    <span id="onboarding-step-label" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/15">Step 1 of 2</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Body metrics (the real profile card is moved in here) -->
+            <div id="onboarding-step-1" class="p-4 sm:p-5 space-y-4">
+                <p class="text-xs text-slate-600">Tell us a bit about yourself. Your targets update live as you go, and you can change any of this later.</p>
+                <div id="onboarding-profile-slot"></div>
+                <button type="button" onclick="onboardingContinue()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition flex items-center justify-center gap-2">
+                    Continue <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Step 2: Save account -->
+            <div id="onboarding-step-2" class="hidden p-5 space-y-4">
+                <div class="p-3.5 rounded-xl bg-sky-50 border border-sky-200 flex items-start gap-3">
+                    <i class="fa-solid fa-cloud text-sky-600 mt-0.5"></i>
+                    <div class="text-xs text-sky-900">
+                        <div class="font-bold mb-0.5">Save your account & sync across devices</div>
+                        Use your email to back up your logs, profile and custom foods, and see them on your phone and laptop. No password needed.
+                    </div>
+                </div>
+
+                <form id="onboarding-email-form" onsubmit="onboardingSendLink(event)" class="space-y-2.5">
+                    <input id="onboarding-email-input" type="email" required autocomplete="email" placeholder="you@example.com" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm font-medium">
+                    <button id="onboarding-send-btn" type="submit" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-envelope"></i> Email Me a Sign-In Link
+                    </button>
+                </form>
+                <div id="onboarding-link-sent" class="hidden space-y-3">
+                    <p id="onboarding-link-sent-text" class="text-xs text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+                        Link sent! Open it from your inbox in this browser to finish saving your account.
+                    </p>
+                    <button type="button" onclick="finishOnboarding()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition">
+                        Start Tracking
+                    </button>
+                </div>
+
+                <div id="onboarding-skip-box" class="pt-3 border-t border-slate-100 space-y-2">
+                    <p class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex gap-2">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                        <span>Without an account, your data lives only in this browser. Clearing browser data, switching devices, or (on iPhone) not opening the app for a week can erase it.</span>
+                    </p>
+                    <button type="button" onclick="finishOnboarding()" class="w-full py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                        Skip for now — keep data on this device only
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1048,8 +1146,11 @@
                     <form id="scanned-verify-form" onsubmit="handleScannedFoodSave(event)" class="space-y-3">
                         <div class="grid grid-cols-3 gap-2.5">
                             <div class="col-span-2">
-                                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Detected Product Name *</label>
-                                <input id="scan-res-name" type="text" required class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs sm:text-sm font-bold text-slate-900">
+                                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Food Name & Emoji *</label>
+                                <div class="flex gap-1.5">
+                                    <input id="scan-res-emoji" type="text" maxlength="8" aria-label="Food emoji" class="w-11 shrink-0 px-1 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-base text-center">
+                                    <input id="scan-res-name" type="text" required class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs sm:text-sm font-bold text-slate-900">
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Add To Meal</label>
@@ -1112,6 +1213,7 @@
                                         <option value="Produce">🥦 Vegetables & Produce</option>
                                         <option value="FatsSeeds">🥑 Nuts, Seeds & Fats</option>
                                         <option value="MealPrep">🥗 Meal Prep Dishes</option>
+                                        <option value="Snacks">🍿 Snacks, Sweets & Drinks</option>
                                     </select>
                                 </div>
                             </div>
@@ -1158,7 +1260,7 @@
     <!-- Application JavaScript -->
     <script>
         /**************************************************************
-         * 1. 100% STRICTLY VEGETARIAN FOOD DATABASE (82 Verified Foods)
+         * 1. 100% STRICTLY VEGETARIAN FOOD DATABASE (191 Foods)
          * Zero meat, poultry, seafood, gelatin, or animal slaughter products.
          **************************************************************/
         const DEFAULT_FOOD_DB = [
@@ -1256,7 +1358,132 @@
             { id: 'v79', name: 'Sourdough Avocado & Hemp Toast', category: 'MealPrep', servingDesc: '1 slice loaded (130g)', grams: 130, cal: 275, p: 8.5, c: 28, f: 15, fiber: 6.5, icon: '🥑' },
             { id: 'v80', name: 'Overnight Protein Oats with Berries & PB', category: 'MealPrep', servingDesc: '1 jar (280g)', grams: 280, cal: 385, p: 32, c: 48, f: 9.5, fiber: 8, icon: '🌾' },
             { id: 'v81', name: 'Paneer Tikka (Grilled Spiced Paneer & Peppers)', category: 'MealPrep', servingDesc: '1 skewer plate (180g)', grams: 180, cal: 320, p: 22, c: 9, f: 22, fiber: 3, icon: '🍢' },
-            { id: 'v82', name: 'Steamed Edamame in Pods with Sea Salt', category: 'MealPrep', servingDesc: '1 cup in pods (150g)', grams: 150, cal: 130, p: 12, c: 10, f: 5, fiber: 6, icon: '🫛' }
+            { id: 'v82', name: 'Steamed Edamame in Pods with Sea Salt', category: 'MealPrep', servingDesc: '1 cup in pods (150g)', grams: 150, cal: 130, p: 12, c: 10, f: 5, fiber: 6, icon: '🫛' },
+
+            // PLANT-BASED MEATS & MILKS
+            { id: 'v83', name: 'Beyond Burger Patty', category: 'PlantPro', servingDesc: '1 patty (113g)', grams: 113, cal: 230, p: 21, c: 7, f: 14, fiber: 2, icon: '🍔' },
+            { id: 'v84', name: 'Impossible Burger Patty', category: 'PlantPro', servingDesc: '1 patty (113g)', grams: 113, cal: 240, p: 19, c: 9, f: 14, fiber: 3, icon: '🍔' },
+            { id: 'v85', name: 'Black Bean Veggie Burger Patty', category: 'PlantPro', servingDesc: '1 patty (67g)', grams: 67, cal: 110, p: 9, c: 11, f: 4, fiber: 4, icon: '🍔' },
+            { id: 'v86', name: 'Plant-Based Chicken Nuggets', category: 'PlantPro', servingDesc: '4 nuggets (86g)', grams: 86, cal: 190, p: 12, c: 15, f: 9, fiber: 3, icon: '🍗' },
+            { id: 'v87', name: 'Plant-Based Breakfast Sausage', category: 'PlantPro', servingDesc: '2 links (45g)', grams: 45, cal: 100, p: 9, c: 3, f: 6, fiber: 1, icon: '🌭' },
+            { id: 'v88', name: 'Baked Marinated Tofu (Store-Bought)', category: 'PlantPro', servingDesc: '3 oz (85g)', grams: 85, cal: 150, p: 14, c: 5, f: 8, fiber: 1, icon: '🧊' },
+            { id: 'v89', name: 'Unsweetened Soy Milk', category: 'PlantPro', servingDesc: '1 cup (240ml)', grams: 240, cal: 80, p: 7, c: 4, f: 4, fiber: 1, icon: '🥛' },
+            { id: 'v90', name: 'Oat Milk (Original)', category: 'PlantPro', servingDesc: '1 cup (240ml)', grams: 240, cal: 120, p: 3, c: 16, f: 5, fiber: 2, icon: '🥛' },
+            { id: 'v91', name: 'Unsweetened Almond Milk', category: 'PlantPro', servingDesc: '1 cup (240ml)', grams: 240, cal: 30, p: 1, c: 1, f: 2.5, fiber: 0.5, icon: '🥛' },
+
+            // MORE DAIRY & EGGS
+            { id: 'v92', name: '2% Reduced-Fat Milk', category: 'DairyEggs', servingDesc: '1 cup (240ml)', grams: 244, cal: 122, p: 8, c: 12, f: 4.8, fiber: 0, icon: '🥛' },
+            { id: 'v93', name: 'Whole Milk', category: 'DairyEggs', servingDesc: '1 cup (240ml)', grams: 244, cal: 149, p: 7.7, c: 11.7, f: 7.9, fiber: 0, icon: '🥛' },
+            { id: 'v94', name: 'Greek Yogurt (2% Plain)', category: 'DairyEggs', servingDesc: '3/4 cup (170g)', grams: 170, cal: 130, p: 17, c: 6, f: 3.5, fiber: 0, icon: '🥣' },
+            { id: 'v95', name: 'Icelandic Skyr (Plain, Non-Fat)', category: 'DairyEggs', servingDesc: '1 cup (150g)', grams: 150, cal: 90, p: 16, c: 6, f: 0, fiber: 0, icon: '🥣' },
+            { id: 'v96', name: 'Plain Kefir (Low-Fat)', category: 'DairyEggs', servingDesc: '1 cup (240ml)', grams: 240, cal: 110, p: 11, c: 12, f: 2, fiber: 0, icon: '🥛' },
+            { id: 'v97', name: 'Part-Skim String Cheese', category: 'DairyEggs', servingDesc: '1 stick (28g)', grams: 28, cal: 80, p: 7, c: 1, f: 6, fiber: 0, icon: '🧀' },
+            { id: 'v98', name: 'Vegetarian Parmesan (Microbial Rennet, Grated)', category: 'DairyEggs', servingDesc: '2 tbsp (10g)', grams: 10, cal: 42, p: 3.8, c: 0.4, f: 2.8, fiber: 0, icon: '🧀' },
+            { id: 'v99', name: 'Cream Cheese', category: 'DairyEggs', servingDesc: '2 tbsp (29g)', grams: 29, cal: 99, p: 1.8, c: 1.6, f: 9.8, fiber: 0, icon: '🧀' },
+            { id: 'v100', name: 'Sour Cream', category: 'DairyEggs', servingDesc: '2 tbsp (24g)', grams: 24, cal: 47, p: 0.6, c: 1.1, f: 4.6, fiber: 0, icon: '🥄' },
+            { id: 'v101', name: 'Salted Butter', category: 'DairyEggs', servingDesc: '1 tbsp (14g)', grams: 14, cal: 102, p: 0.1, c: 0, f: 11.5, fiber: 0, icon: '🧈' },
+            { id: 'v102', name: 'Hard-Boiled Egg', category: 'DairyEggs', servingDesc: '1 large (50g)', grams: 50, cal: 78, p: 6.3, c: 0.6, f: 5.3, fiber: 0, icon: '🥚' },
+
+            // MORE LEGUMES
+            { id: 'v103', name: 'Vegetarian Refried Beans', category: 'Legumes', servingDesc: '1/2 cup (120g)', grams: 120, cal: 110, p: 6, c: 18, f: 1.5, fiber: 6, icon: '🫘' },
+            { id: 'v104', name: 'Cannellini / White Beans (Cooked)', category: 'Legumes', servingDesc: '1/2 cup (90g)', grams: 90, cal: 125, p: 8.5, c: 22.5, f: 0.3, fiber: 5.7, icon: '🫘' },
+            { id: 'v105', name: 'Black-Eyed Peas (Cooked)', category: 'Legumes', servingDesc: '1/2 cup (86g)', grams: 86, cal: 100, p: 6.7, c: 17.9, f: 0.5, fiber: 5.6, icon: '🫘' },
+            { id: 'v106', name: 'Chickpea Pasta (Banza, Dry)', category: 'Legumes', servingDesc: '2 oz dry (56g)', grams: 56, cal: 190, p: 11, c: 32, f: 3.5, fiber: 5, icon: '🍝' },
+            { id: 'v107', name: 'Red Lentil Pasta (Dry)', category: 'Legumes', servingDesc: '2 oz dry (56g)', grams: 56, cal: 190, p: 14, c: 33, f: 1, fiber: 4, icon: '🍝' },
+
+            // MORE GRAINS & BREADS
+            { id: 'v108', name: 'White Pasta / Spaghetti (Cooked)', category: 'Grains', servingDesc: '1 cup (140g)', grams: 140, cal: 221, p: 8.1, c: 43.2, f: 1.3, fiber: 2.5, icon: '🍝' },
+            { id: 'v109', name: 'Plain Bagel', category: 'Grains', servingDesc: '1 medium (105g)', grams: 105, cal: 277, p: 11, c: 55, f: 1.4, fiber: 2.4, icon: '🥯' },
+            { id: 'v110', name: 'Whole Wheat English Muffin', category: 'Grains', servingDesc: '1 muffin (66g)', grams: 66, cal: 134, p: 5.8, c: 26.7, f: 1.4, fiber: 4.4, icon: '🍞' },
+            { id: 'v111', name: 'Whole Wheat Sandwich Bread', category: 'Grains', servingDesc: '1 slice (32g)', grams: 32, cal: 81, p: 4, c: 13.8, f: 1.1, fiber: 1.9, icon: '🍞' },
+            { id: 'v112', name: 'Whole Wheat Pita', category: 'Grains', servingDesc: '1 pita, 6.5" (64g)', grams: 64, cal: 170, p: 6.3, c: 35.2, f: 1.7, fiber: 4.7, icon: '🫓' },
+            { id: 'v113', name: 'Garlic Naan', category: 'Grains', servingDesc: '1 piece (90g)', grams: 90, cal: 262, p: 8.7, c: 45.4, f: 5.1, fiber: 2, icon: '🫓' },
+            { id: 'v114', name: 'Flour Tortilla (Large)', category: 'Grains', servingDesc: '1 tortilla, 10" (72g)', grams: 72, cal: 218, p: 5.9, c: 36.3, f: 5.4, fiber: 2.5, icon: '🌯' },
+            { id: 'v115', name: 'Couscous (Cooked)', category: 'Grains', servingDesc: '1 cup (157g)', grams: 157, cal: 176, p: 6, c: 36.5, f: 0.3, fiber: 2.2, icon: '🍚' },
+            { id: 'v116', name: 'Pearl Barley (Cooked)', category: 'Grains', servingDesc: '1 cup (157g)', grams: 157, cal: 193, p: 3.5, c: 44.3, f: 0.7, fiber: 6, icon: '🌾' },
+            { id: 'v117', name: 'Soba Noodles (Cooked)', category: 'Grains', servingDesc: '1 cup (114g)', grams: 114, cal: 113, p: 5.8, c: 24.4, f: 0.1, fiber: 1.5, icon: '🍜' },
+            { id: 'v118', name: 'Udon Noodles (Cooked)', category: 'Grains', servingDesc: '1 cup (200g)', grams: 200, cal: 210, p: 5.2, c: 43, f: 0.8, fiber: 1.6, icon: '🍜' },
+            { id: 'v119', name: 'Granola (Oat & Honey)', category: 'Grains', servingDesc: '1/2 cup (55g)', grams: 55, cal: 245, p: 5.5, c: 36, f: 9, fiber: 3.5, icon: '🥣' },
+            { id: 'v120', name: 'Cheerios (Original)', category: 'Grains', servingDesc: '1.5 cups (39g)', grams: 39, cal: 140, p: 5, c: 29, f: 2.5, fiber: 4, icon: '🥣' },
+            { id: 'v121', name: 'Plain Brown Rice Cakes', category: 'Grains', servingDesc: '2 cakes (18g)', grams: 18, cal: 70, p: 1.4, c: 14.6, f: 0.5, fiber: 0.8, icon: '🍘' },
+            { id: 'v122', name: 'Buttermilk Pancakes', category: 'Grains', servingDesc: '3 pancakes, 4" (114g)', grams: 114, cal: 260, p: 7.3, c: 37.4, f: 9.3, fiber: 1.4, icon: '🥞' },
+            { id: 'v123', name: 'Frozen Waffles (Whole Grain)', category: 'Grains', servingDesc: '2 waffles (70g)', grams: 70, cal: 170, p: 4, c: 28, f: 6, fiber: 3, icon: '🧇' },
+
+            // MORE VEGETABLES & FRUIT
+            { id: 'v124', name: 'Cauliflower Florets (Steamed)', category: 'Produce', servingDesc: '1 cup (124g)', grams: 124, cal: 28, p: 2.3, c: 5.1, f: 0.6, fiber: 2.9, icon: '🥦' },
+            { id: 'v125', name: 'Baby Carrots', category: 'Produce', servingDesc: '10 carrots (100g)', grams: 100, cal: 35, p: 0.6, c: 8.2, f: 0.1, fiber: 2.9, icon: '🥕' },
+            { id: 'v126', name: 'Green Beans (Steamed)', category: 'Produce', servingDesc: '1 cup (125g)', grams: 125, cal: 44, p: 2.4, c: 9.9, f: 0.4, fiber: 4, icon: '🫛' },
+            { id: 'v127', name: 'Brussels Sprouts (Roasted)', category: 'Produce', servingDesc: '1 cup (156g)', grams: 156, cal: 56, p: 4, c: 11, f: 0.8, fiber: 4.1, icon: '🥬' },
+            { id: 'v128', name: 'Romaine Lettuce (Chopped)', category: 'Produce', servingDesc: '2 cups (94g)', grams: 94, cal: 16, p: 1.2, c: 3.1, f: 0.3, fiber: 2, icon: '🥬' },
+            { id: 'v129', name: 'Green Peas (Frozen, Cooked)', category: 'Produce', servingDesc: '1/2 cup (80g)', grams: 80, cal: 62, p: 4.1, c: 11.4, f: 0.2, fiber: 4.4, icon: '🫛' },
+            { id: 'v130', name: 'Eggplant (Roasted)', category: 'Produce', servingDesc: '1 cup (99g)', grams: 99, cal: 35, p: 0.8, c: 8.6, f: 0.2, fiber: 2.5, icon: '🍆' },
+            { id: 'v131', name: 'Butternut Squash (Roasted)', category: 'Produce', servingDesc: '1 cup (205g)', grams: 205, cal: 82, p: 1.8, c: 21.5, f: 0.2, fiber: 6.6, icon: '🎃' },
+            { id: 'v132', name: 'Beets (Cooked)', category: 'Produce', servingDesc: '1/2 cup (85g)', grams: 85, cal: 37, p: 1.4, c: 8.5, f: 0.2, fiber: 1.7, icon: '🥗' },
+            { id: 'v133', name: 'Navel Orange', category: 'Produce', servingDesc: '1 medium (140g)', grams: 140, cal: 69, p: 1.3, c: 17.6, f: 0.2, fiber: 3.1, icon: '🍊' },
+            { id: 'v134', name: 'Mango (Sliced)', category: 'Produce', servingDesc: '1 cup (165g)', grams: 165, cal: 99, p: 1.4, c: 24.7, f: 0.6, fiber: 2.6, icon: '🥭' },
+            { id: 'v135', name: 'Red Grapes', category: 'Produce', servingDesc: '1 cup (151g)', grams: 151, cal: 104, p: 1.1, c: 27.3, f: 0.2, fiber: 1.4, icon: '🍇' },
+            { id: 'v136', name: 'Pineapple Chunks', category: 'Produce', servingDesc: '1 cup (165g)', grams: 165, cal: 82, p: 0.9, c: 21.6, f: 0.2, fiber: 2.3, icon: '🍍' },
+            { id: 'v137', name: 'Watermelon (Diced)', category: 'Produce', servingDesc: '1 cup (152g)', grams: 152, cal: 46, p: 0.9, c: 11.5, f: 0.2, fiber: 0.6, icon: '🍉' },
+            { id: 'v138', name: 'Raspberries (Fresh)', category: 'Produce', servingDesc: '1 cup (123g)', grams: 123, cal: 64, p: 1.5, c: 14.7, f: 0.8, fiber: 8, icon: '🍓' },
+            { id: 'v139', name: 'Bartlett Pear', category: 'Produce', servingDesc: '1 medium (178g)', grams: 178, cal: 101, p: 0.6, c: 27.1, f: 0.3, fiber: 5.5, icon: '🍐' },
+            { id: 'v140', name: 'Medjool Dates', category: 'Produce', servingDesc: '2 dates (48g)', grams: 48, cal: 133, p: 0.9, c: 36, f: 0.1, fiber: 3.2, icon: '🌴' },
+            { id: 'v141', name: 'Frozen Mixed Berries', category: 'Produce', servingDesc: '1 cup (140g)', grams: 140, cal: 70, p: 1, c: 17, f: 0.5, fiber: 4, icon: '🫐' },
+
+            // MORE NUTS, SEEDS & FATS
+            { id: 'v142', name: 'Roasted Cashews', category: 'FatsSeeds', servingDesc: '1 oz (28g)', grams: 28, cal: 160, p: 4.3, c: 9.2, f: 12.9, fiber: 0.9, icon: '🥜' },
+            { id: 'v143', name: 'Pistachios (Shelled)', category: 'FatsSeeds', servingDesc: '1 oz (28g)', grams: 28, cal: 159, p: 5.7, c: 7.7, f: 12.8, fiber: 3, icon: '🥜' },
+            { id: 'v144', name: 'Dry-Roasted Peanuts', category: 'FatsSeeds', servingDesc: '1 oz (28g)', grams: 28, cal: 166, p: 6.7, c: 6.1, f: 14.1, fiber: 2.3, icon: '🥜' },
+            { id: 'v145', name: 'Sunflower Seeds (Shelled)', category: 'FatsSeeds', servingDesc: '1 oz (28g)', grams: 28, cal: 165, p: 5.5, c: 6.8, f: 14.1, fiber: 3.1, icon: '🌻' },
+            { id: 'v146', name: 'Tahini (Sesame Paste)', category: 'FatsSeeds', servingDesc: '1 tbsp (15g)', grams: 15, cal: 89, p: 2.6, c: 3.2, f: 8.1, fiber: 1.4, icon: '🥄' },
+            { id: 'v147', name: 'Virgin Coconut Oil', category: 'FatsSeeds', servingDesc: '1 tbsp (14g)', grams: 14, cal: 121, p: 0, c: 0, f: 13.5, fiber: 0, icon: '🥥' },
+            { id: 'v148', name: 'Fresh Guacamole', category: 'FatsSeeds', servingDesc: '2 tbsp (30g)', grams: 30, cal: 50, p: 0.6, c: 2.6, f: 4.4, fiber: 2, icon: '🥑' },
+
+            // MORE VEGETARIAN DISHES (HOME & RESTAURANT STYLE)
+            { id: 'v149', name: 'Cheese Pizza Slice (Regular Crust)', category: 'MealPrep', servingDesc: '1 slice, 14" pie (107g)', grams: 107, cal: 285, p: 12.2, c: 35.7, f: 10.4, fiber: 2.5, icon: '🍕' },
+            { id: 'v150', name: 'Veggie Pizza Slice', category: 'MealPrep', servingDesc: '1 slice, 14" pie (125g)', grams: 125, cal: 270, p: 11, c: 34, f: 10, fiber: 3, icon: '🍕' },
+            { id: 'v151', name: 'Bean & Cheese Burrito', category: 'MealPrep', servingDesc: '1 burrito (200g)', grams: 200, cal: 420, p: 17, c: 55, f: 14, fiber: 9, icon: '🌯' },
+            { id: 'v152', name: 'Veggie Burrito Bowl (Rice, Beans, Salsa, Cheese)', category: 'MealPrep', servingDesc: '1 bowl (450g)', grams: 450, cal: 640, p: 24, c: 85, f: 22, fiber: 18, icon: '🥙' },
+            { id: 'v153', name: 'Cheese Quesadilla', category: 'MealPrep', servingDesc: '1 quesadilla, 8" (140g)', grams: 140, cal: 420, p: 18, c: 32, f: 24, fiber: 2, icon: '🫓' },
+            { id: 'v154', name: 'Black Bean Tacos (2)', category: 'MealPrep', servingDesc: '2 tacos (200g)', grams: 200, cal: 340, p: 13, c: 50, f: 10, fiber: 12, icon: '🌮' },
+            { id: 'v155', name: 'Classic Mac & Cheese', category: 'MealPrep', servingDesc: '1 cup (200g)', grams: 200, cal: 400, p: 16, c: 46, f: 17, fiber: 2, icon: '🧀' },
+            { id: 'v156', name: 'Vegetable Lasagna', category: 'MealPrep', servingDesc: '1 piece (250g)', grams: 250, cal: 350, p: 18, c: 36, f: 15, fiber: 4, icon: '🍝' },
+            { id: 'v157', name: 'Spaghetti Marinara', category: 'MealPrep', servingDesc: '1.5 cups (300g)', grams: 300, cal: 360, p: 12, c: 68, f: 5, fiber: 6, icon: '🍝' },
+            { id: 'v158', name: 'Grilled Cheese Sandwich', category: 'MealPrep', servingDesc: '1 sandwich (120g)', grams: 120, cal: 390, p: 14, c: 30, f: 24, fiber: 1.5, icon: '🥪' },
+            { id: 'v159', name: 'Peanut Butter & Jelly Sandwich', category: 'MealPrep', servingDesc: '1 sandwich (100g)', grams: 100, cal: 350, p: 12, c: 46, f: 14, fiber: 4, icon: '🥪' },
+            { id: 'v160', name: 'Caprese Sandwich (Mozzarella, Tomato, Pesto)', category: 'MealPrep', servingDesc: '1 sandwich (220g)', grams: 220, cal: 520, p: 22, c: 50, f: 26, fiber: 3, icon: '🥪' },
+            { id: 'v161', name: 'Vegetable Fried Rice with Egg', category: 'MealPrep', servingDesc: '1.5 cups (300g)', grams: 300, cal: 440, p: 12, c: 66, f: 14, fiber: 4, icon: '🍚' },
+            { id: 'v162', name: 'Tofu & Vegetable Stir-Fry', category: 'MealPrep', servingDesc: '1 plate (350g)', grams: 350, cal: 320, p: 20, c: 22, f: 17, fiber: 6, icon: '🥘' },
+            { id: 'v163', name: 'Chana Masala (Chickpea Curry)', category: 'MealPrep', servingDesc: '1 cup (240g)', grams: 240, cal: 290, p: 11, c: 38, f: 11, fiber: 10, icon: '🍛' },
+            { id: 'v164', name: 'Palak Paneer (Spinach & Paneer)', category: 'MealPrep', servingDesc: '1 cup (240g)', grams: 240, cal: 340, p: 15, c: 12, f: 26, fiber: 4, icon: '🍛' },
+            { id: 'v165', name: 'Vegetable Sushi Roll (Avocado & Cucumber)', category: 'MealPrep', servingDesc: '1 roll, 6 pcs (180g)', grams: 180, cal: 240, p: 4.5, c: 42, f: 6, fiber: 4, icon: '🍣' },
+            { id: 'v166', name: 'Shakshuka (Eggs in Tomato Sauce)', category: 'MealPrep', servingDesc: '2 eggs with sauce (300g)', grams: 300, cal: 290, p: 16, c: 18, f: 17, fiber: 5, icon: '🍳' },
+            { id: 'v167', name: 'Spinach & Feta Omelette (3 Eggs)', category: 'MealPrep', servingDesc: '1 omelette (210g)', grams: 210, cal: 330, p: 23, c: 4, f: 24, fiber: 1, icon: '🍳' },
+            { id: 'v168', name: 'Minestrone Soup', category: 'MealPrep', servingDesc: '1.5 cups (360g)', grams: 360, cal: 190, p: 8, c: 33, f: 3, fiber: 7, icon: '🍲' },
+            { id: 'v169', name: 'Vegetarian Lentil Soup', category: 'MealPrep', servingDesc: '1.5 cups (360g)', grams: 360, cal: 250, p: 15, c: 40, f: 3.5, fiber: 14, icon: '🍲' },
+            { id: 'v170', name: 'Veggie Hummus Wrap', category: 'MealPrep', servingDesc: '1 wrap (250g)', grams: 250, cal: 420, p: 13, c: 55, f: 17, fiber: 9, icon: '🌯' },
+            { id: 'v171', name: 'Egg & Cheese Breakfast Sandwich', category: 'MealPrep', servingDesc: '1 English muffin sandwich (140g)', grams: 140, cal: 310, p: 17, c: 28, f: 14, fiber: 2, icon: '🥪' },
+            { id: 'v172', name: 'Avocado Toast (Whole Grain)', category: 'MealPrep', servingDesc: '1 slice (110g)', grams: 110, cal: 230, p: 6, c: 22, f: 14, fiber: 7, icon: '🥑' },
+
+            // SNACKS, SWEETS & DRINKS
+            { id: 'v173', name: 'Plant Protein Bar (Generic)', category: 'Snacks', servingDesc: '1 bar (60g)', grams: 60, cal: 230, p: 20, c: 24, f: 8, fiber: 10, icon: '🍫' },
+            { id: 'v174', name: 'Chewy Granola Bar', category: 'Snacks', servingDesc: '1 bar (24g)', grams: 24, cal: 100, p: 1, c: 17, f: 3.5, fiber: 1, icon: '🍫' },
+            { id: 'v175', name: 'Trail Mix (Nuts, Raisins, Chocolate)', category: 'Snacks', servingDesc: '1/4 cup (38g)', grams: 38, cal: 175, p: 5, c: 17, f: 11, fiber: 2, icon: '🥜' },
+            { id: 'v176', name: 'Air-Popped Popcorn', category: 'Snacks', servingDesc: '3 cups (24g)', grams: 24, cal: 93, p: 3, c: 18.6, f: 1.1, fiber: 3.5, icon: '🍿' },
+            { id: 'v177', name: 'Tortilla Chips', category: 'Snacks', servingDesc: '1 oz, ~10 chips (28g)', grams: 28, cal: 140, p: 2, c: 18, f: 7, fiber: 1, icon: '🌽' },
+            { id: 'v178', name: 'Fresh Salsa (Pico de Gallo)', category: 'Snacks', servingDesc: '1/4 cup (65g)', grams: 65, cal: 17, p: 0.7, c: 3.8, f: 0.1, fiber: 1, icon: '🍅' },
+            { id: 'v179', name: 'Whole Wheat Crackers', category: 'Snacks', servingDesc: '6 crackers (28g)', grams: 28, cal: 120, p: 2.5, c: 19, f: 4, fiber: 3, icon: '🍘' },
+            { id: 'v180', name: 'Pretzels', category: 'Snacks', servingDesc: '1 oz (28g)', grams: 28, cal: 108, p: 2.9, c: 22.5, f: 0.8, fiber: 0.9, icon: '🥨' },
+            { id: 'v181', name: 'Raisins', category: 'Snacks', servingDesc: '1 small box (43g)', grams: 43, cal: 129, p: 1.3, c: 34, f: 0.2, fiber: 1.6, icon: '🍇' },
+            { id: 'v182', name: 'Chocolate Chip Cookie', category: 'Snacks', servingDesc: '1 medium cookie (30g)', grams: 30, cal: 145, p: 1.6, c: 19, f: 7.3, fiber: 0.7, icon: '🍪' },
+            { id: 'v183', name: 'Vanilla Ice Cream', category: 'Snacks', servingDesc: '1/2 cup (66g)', grams: 66, cal: 137, p: 2.3, c: 15.6, f: 7.3, fiber: 0.5, icon: '🍨' },
+            { id: 'v184', name: 'Honey', category: 'Snacks', servingDesc: '1 tbsp (21g)', grams: 21, cal: 64, p: 0.1, c: 17.3, f: 0, fiber: 0, icon: '🍯' },
+            { id: 'v185', name: 'Pure Maple Syrup', category: 'Snacks', servingDesc: '2 tbsp (40g)', grams: 40, cal: 104, p: 0, c: 26.8, f: 0, fiber: 0, icon: '🍁' },
+            { id: 'v186', name: 'Strawberry Jam', category: 'Snacks', servingDesc: '1 tbsp (20g)', grams: 20, cal: 56, p: 0.1, c: 13.8, f: 0, fiber: 0.2, icon: '🍓' },
+            { id: 'v187', name: 'Orange Juice', category: 'Snacks', servingDesc: '1 cup (240ml)', grams: 248, cal: 112, p: 1.7, c: 25.8, f: 0.5, fiber: 0.5, icon: '🧃' },
+            { id: 'v188', name: 'Oat Milk Latte (Grande, 16 oz)', category: 'Snacks', servingDesc: '1 drink (473ml)', grams: 473, cal: 190, p: 3, c: 25, f: 9, fiber: 2, icon: '☕' },
+            { id: 'v189', name: 'Caffè Latte with 2% Milk (Grande, 16 oz)', category: 'Snacks', servingDesc: '1 drink (473ml)', grams: 473, cal: 190, p: 13, c: 19, f: 7, fiber: 0, icon: '☕' },
+            { id: 'v190', name: 'Black Coffee', category: 'Snacks', servingDesc: '1 cup (240ml)', grams: 240, cal: 2, p: 0.3, c: 0, f: 0, fiber: 0, icon: '☕' },
+            { id: 'v191', name: 'Fruit & Yogurt Smoothie', category: 'Snacks', servingDesc: '16 oz (473ml)', grams: 473, cal: 280, p: 10, c: 54, f: 3, fiber: 4, icon: '🥤' }
         ];
 
         const MEAL_SLOTS = [
@@ -1317,7 +1544,8 @@
                 waterCups: 0,
                 logsByDate: {},
                 customFoods: [],
-                activeCategory: 'All'
+                activeCategory: 'All',
+                onboarded: false
             };
         }
 
@@ -1386,9 +1614,30 @@
                     perWeightRate: { ...getDefaultState().profile.perWeightRate, ...(parsed.profile?.perWeightRate || {}) }
                 },
                 customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
-                logsByDate: parsed.logsByDate || {}
+                logsByDate: parsed.logsByDate || {},
+                // Saved data from before onboarding existed belongs to an existing user.
+                onboarded: parsed.onboarded !== false
             };
+            upgradePlaceholderEmojis();
             loadDateIntoActiveMeals(state.activeDate);
+        }
+
+        // Custom foods used to all get a generic 🌱; swap in a fitting emoji when the name has an obvious match.
+        function upgradePlaceholderEmojis() {
+            const isCustomId = id => typeof id === 'string' && (id.startsWith('cust_') || id.startsWith('scanned_'));
+            const upgrade = item => {
+                if (item.icon && item.icon !== '🌱') return;
+                const match = matchFoodEmoji(item.name);
+                if (match) item.icon = match;
+            };
+            state.customFoods.forEach(upgrade);
+            Object.values(state.logsByDate).forEach(day => {
+                Object.values(day?.meals || {}).forEach(entries => {
+                    (entries || []).forEach(entry => {
+                        if (isCustomId(entry.foodId)) upgrade(entry);
+                    });
+                });
+            });
         }
 
         function loadState() {
@@ -1397,9 +1646,8 @@
                 if (raw) {
                     hydrateState(JSON.parse(raw));
                 } else {
-                    // Seed clean vegetarian starters
+                    // First visit: start with an empty log; onboarding collects the profile.
                     state = getDefaultState();
-                    seedStarterMeals();
                     syncActiveDayToLogsMap();
                     saveState();
                 }
@@ -1605,21 +1853,29 @@
             document.getElementById('sync-modal').classList.add('hidden');
         }
 
-        async function sendSignInLink(e) {
-            e.preventDefault();
-            const email = document.getElementById('sync-email-input').value.trim();
-            const btn = document.getElementById('sync-send-link-btn');
-            btn.disabled = true;
+        async function requestSignInLink(email, buttonEl) {
+            if (!supabaseClient) {
+                showToast('Cloud sync is unavailable (could not load Supabase)');
+                return false;
+            }
+            buttonEl.disabled = true;
             const { error } = await supabaseClient.auth.signInWithOtp({
                 email,
                 options: { emailRedirectTo: window.location.origin + window.location.pathname }
             });
-            btn.disabled = false;
+            buttonEl.disabled = false;
             if (error) {
                 showToast(`Could not send link: ${error.message}`);
-                return;
+                return false;
             }
-            document.getElementById('sync-link-sent-msg').classList.remove('hidden');
+            return true;
+        }
+
+        async function sendSignInLink(e) {
+            e.preventDefault();
+            const email = document.getElementById('sync-email-input').value.trim();
+            const sent = await requestSignInLink(email, document.getElementById('sync-send-link-btn'));
+            if (sent) document.getElementById('sync-link-sent-msg').classList.remove('hidden');
         }
 
         async function syncNow() {
@@ -1657,6 +1913,108 @@
                 if (document.visibilityState === 'visible') pullFromCloud();
                 else if (syncMeta.dirty) pushToCloud();
             });
+        }
+
+        /**************************************************************
+         * 2E. BODY METRICS CARD COLLAPSE & FIRST-RUN ONBOARDING
+         **************************************************************/
+        const PROFILE_COLLAPSED_KEY = 'nutripulse_profile_collapsed';
+        let profileCardHome = null; // { parent, next } so the card can return after onboarding
+
+        function isProfileCollapsed() {
+            const pref = localStorage.getItem(PROFILE_COLLAPSED_KEY);
+            return pref === null ? state.onboarded : pref === '1';
+        }
+
+        function applyProfileCollapse() {
+            const collapsed = isProfileCollapsed() && !profileCardHome;
+            document.getElementById('profile-card-body').classList.toggle('hidden', collapsed);
+            document.getElementById('unit-toggle-group').classList.toggle('hidden', collapsed);
+            document.getElementById('profile-summary').classList.toggle('hidden', !collapsed);
+            document.getElementById('profile-toggle-btn').classList.toggle('hidden', Boolean(profileCardHome));
+            document.getElementById('profile-toggle-label').textContent = collapsed ? 'Edit' : 'Done';
+            document.getElementById('profile-toggle-icon').className = collapsed ? 'fa-solid fa-pen text-[10px]' : 'fa-solid fa-check text-[10px]';
+        }
+
+        function toggleProfileCard() {
+            localStorage.setItem(PROFILE_COLLAPSED_KEY, isProfileCollapsed() ? '0' : '1');
+            applyProfileCollapse();
+        }
+
+        function renderProfileSummary() {
+            const p = state.profile;
+            let size;
+            if (state.unitSystem === 'imperial') {
+                const totalIn = Math.round(p.heightCm / 2.54);
+                size = `${Math.floor(totalIn / 12)}'${totalIn % 12}" • ${Math.round(p.weightKg * 2.20462)} lb`;
+            } else {
+                size = `${Math.round(p.heightCm)} cm • ${Math.round(p.weightKg)} kg`;
+            }
+            const activity = { 1.2: 'Sedentary', 1.375: 'Lightly active', 1.55: 'Moderately active', 1.725: 'Very active', 1.9: 'Extra active' }[p.activity] || 'Active';
+            const goal = { cut: '🔥 Cut', maintain: '⚖️ Maintain', bulk: '💪 Lean bulk', custom: '🎯 Custom' }[p.goal] || '';
+            document.getElementById('profile-summary-text').innerHTML =
+                `<span class="font-bold text-slate-800">${p.sex === 'female' ? 'Female' : 'Male'}, ${p.age}</span> • ${size}<br>${activity} • ${goal}`;
+            document.getElementById('profile-summary-kcal').textContent = Math.round(state.targets.calories || 0).toLocaleString();
+        }
+
+        function startOnboarding() {
+            const card = document.getElementById('profile-card');
+            profileCardHome = { parent: card.parentNode, next: card.nextSibling };
+            document.getElementById('onboarding-profile-slot').appendChild(card);
+            applyProfileCollapse();
+
+            document.getElementById('onboarding-step-1').classList.remove('hidden');
+            document.getElementById('onboarding-step-2').classList.add('hidden');
+            document.getElementById('onboarding-step-label').textContent = 'Step 1 of 2';
+            document.getElementById('onboarding-subtitle').textContent = "Let's set your daily calorie & macro targets";
+            document.getElementById('onboarding-modal').classList.remove('hidden');
+        }
+
+        function returnProfileCardHome() {
+            if (!profileCardHome) return;
+            const card = document.getElementById('profile-card');
+            profileCardHome.parent.insertBefore(card, profileCardHome.next);
+            profileCardHome = null;
+        }
+
+        function onboardingContinue() {
+            returnProfileCardHome();
+            document.getElementById('onboarding-step-1').classList.add('hidden');
+            document.getElementById('onboarding-step-2').classList.remove('hidden');
+            document.getElementById('onboarding-step-label').textContent = 'Step 2 of 2';
+            document.getElementById('onboarding-subtitle').textContent = "Don't lose your progress";
+
+            const canSync = Boolean(supabaseClient);
+            document.getElementById('onboarding-email-form').classList.toggle('hidden', !canSync || Boolean(cloudUser));
+            document.getElementById('onboarding-link-sent').classList.toggle('hidden', !cloudUser);
+            document.getElementById('onboarding-skip-box').classList.toggle('hidden', Boolean(cloudUser));
+            document.getElementById('onboarding-link-sent-text').textContent = cloudUser
+                ? `You're signed in as ${cloudUser.email}, so your data is already saving and syncing.`
+                : 'Link sent! Open it from your inbox in this browser to finish saving your account.';
+            document.getElementById('onboarding-modal').scrollTop = 0;
+        }
+
+        async function onboardingSendLink(e) {
+            e.preventDefault();
+            const email = document.getElementById('onboarding-email-input').value.trim();
+            const sent = await requestSignInLink(email, document.getElementById('onboarding-send-btn'));
+            if (!sent) return;
+            // The link opens a fresh page load, which should not restart onboarding.
+            state.onboarded = true;
+            saveState();
+            document.getElementById('onboarding-email-form').classList.add('hidden');
+            document.getElementById('onboarding-skip-box').classList.add('hidden');
+            document.getElementById('onboarding-link-sent').classList.remove('hidden');
+        }
+
+        function finishOnboarding() {
+            returnProfileCardHome();
+            state.onboarded = true;
+            localStorage.setItem(PROFILE_COLLAPSED_KEY, '1');
+            document.getElementById('onboarding-modal').classList.add('hidden');
+            recalculateAndRender();
+            applyProfileCollapse();
+            showToast('You\'re all set! Tap "Edit" on Body Metrics anytime to update.');
         }
 
         function formatFriendlyDateLabel(dateStr) {
@@ -1744,11 +2102,192 @@
             return [...state.customFoods, ...DEFAULT_FOOD_DB];
         }
 
+        /**************************************************************
+         * 2C. FOOD EMOJI PICKER
+         **************************************************************/
+        // Ordered most-specific first: the first matching pattern wins.
+        const FOOD_EMOJI_RULES = [
+            [/burrito bowl|poke|grain bowl|buddha bowl|power bowl/, '🥙'],
+            [/burrito|wrap\b/, '🌯'],
+            [/taco|fajita/, '🌮'],
+            [/quesadilla|naan|pita|flatbread|arepa|roti|chapati|paratha/, '🫓'],
+            [/pizza|calzone/, '🍕'],
+            [/burger|patty/, '🍔'],
+            [/hot ?dog|sausage|bratwurst/, '🌭'],
+            [/nugget|tender|wing/, '🍗'],
+            [/fries|tater/, '🍟'],
+            [/sandwich|panini|sub\b|hoagie|blt/, '🥪'],
+            [/falafel/, '🧆'],
+            [/sushi|maki|nigiri/, '🍣'],
+            [/dumpling|gyoza|potsticker|momo|bao/, '🥟'],
+            [/ramen|pho|noodle|udon|soba|lo mein|pad thai|chow mein/, '🍜'],
+            [/spaghetti|pasta|lasagna|penne|ravioli|gnocchi|fettuccine|linguine|mac and|mac ?& ?cheese|alfredo/, '🍝'],
+            [/curry|masala|tikka|korma|dal\b|dahl|biryani/, '🍛'],
+            [/fried rice|risotto|rice/, '🍚'],
+            [/soup|stew|chili|broth|bisque|gumbo/, '🍲'],
+            [/stir[- ]?fry|paella|skillet/, '🥘'],
+            [/salad|slaw/, '🥗'],
+            [/omelet|scramble|frittata|shakshuka|fried egg/, '🍳'],
+            [/eggplant|aubergine/, '🍆'],
+            [/egg/, '🥚'],
+            [/pancake|crepe/, '🥞'],
+            [/waffle/, '🧇'],
+            [/bagel/, '🥯'],
+            [/croissant|pastry|danish/, '🥐'],
+            [/pretzel/, '🥨'],
+            [/toast|bread|sourdough|baguette|muffin|biscuit/, '🍞'],
+            [/oatmeal|oats|porridge|cereal|granola|yogurt|parfait|acai|smoothie bowl/, '🥣'],
+            [/smoothie|shake|boba|bubble tea/, '🥤'],
+            [/latte|coffee|espresso|cappuccino|mocha|americano|cold brew/, '☕'],
+            [/matcha|\btea\b|chai/, '🍵'],
+            [/juice|lemonade|kombucha/, '🧃'],
+            [/beer|ale\b|lager|ipa\b/, '🍺'],
+            [/wine/, '🍷'],
+            [/cocktail|margarita|mojito/, '🍸'],
+            [/milk/, '🥛'],
+            [/cheese|paneer|mozzarella|cheddar|feta|brie/, '🧀'],
+            [/peanut|cashew|almond|pistachio|trail mix|nut butter|nut\b|nuts\b/, '🥜'],
+            [/butter\b/, '🧈'],
+            [/ice cream|gelato|froyo|frozen yogurt|sundae/, '🍨'],
+            [/cupcake/, '🧁'],
+            [/cake|cheesecake|brownie|tiramisu/, '🍰'],
+            [/pie\b|tart/, '🥧'],
+            [/donut|doughnut/, '🍩'],
+            [/cookie|biscotti/, '🍪'],
+            [/chocolate|cocoa|candy bar|protein bar|granola bar|\bbar\b/, '🍫'],
+            [/candy|gummy|lollipop/, '🍬'],
+            [/popcorn/, '🍿'],
+            [/chip|nacho|crisps/, '🌽'],
+            [/cracker|rice cake/, '🍘'],
+            [/honey/, '🍯'],
+            [/walnut|pecan|chestnut|hazelnut/, '🌰'],
+            [/avocado|guac/, '🥑'],
+            [/tofu/, '🧊'],
+            [/edamame|green bean|snap pea|snow pea|green pea/, '🫛'],
+            [/bean|lentil|chickpea|hummus/, '🫘'],
+            [/\bpeas?\b/, '🫛'],
+            [/broccoli|cauliflower/, '🥦'],
+            [/spinach|kale|lettuce|cabbage|greens|bok choy|chard/, '🥬'],
+            [/carrot/, '🥕'],
+            [/corn\b|elote/, '🌽'],
+            [/sweet potato|yam/, '🍠'],
+            [/potato|hash brown/, '🥔'],
+            [/tomato|marinara|salsa/, '🍅'],
+            [/mushroom/, '🍄'],
+            [/pepper/, '🫑'],
+            [/cucumber|pickle|zucchini/, '🥒'],
+            [/onion/, '🧅'],
+            [/garlic/, '🧄'],
+            [/apple/, '🍎'],
+            [/banana/, '🍌'],
+            [/orange|clementine|mandarin|tangerine/, '🍊'],
+            [/lemon|lime/, '🍋'],
+            [/strawberr|raspberr/, '🍓'],
+            [/blueberr|berries/, '🫐'],
+            [/grape|raisin/, '🍇'],
+            [/watermelon/, '🍉'],
+            [/melon|cantaloupe/, '🍈'],
+            [/pineapple/, '🍍'],
+            [/mango/, '🥭'],
+            [/peach|nectarine|apricot/, '🍑'],
+            [/cherr/, '🍒'],
+            [/pear\b|pears\b/, '🍐'],
+            [/kiwi/, '🥝'],
+            [/coconut/, '🥥'],
+            [/olive/, '🫒'],
+            [/pumpkin|squash/, '🎃']
+        ];
+
+        const CATEGORY_EMOJI = {
+            PlantPro: '🌱', DairyEggs: '🧀', Legumes: '🫘', Grains: '🍚',
+            Produce: '🥦', FatsSeeds: '🥜', MealPrep: '🍽️', Snacks: '🍿'
+        };
+
+        function matchFoodEmoji(name) {
+            const lower = (name || '').toLowerCase();
+            const rule = FOOD_EMOJI_RULES.find(([pattern]) => pattern.test(lower));
+            return rule ? rule[1] : null;
+        }
+
+        function suggestFoodEmoji(name, category) {
+            return matchFoodEmoji(name) || CATEGORY_EMOJI[category] || '🍽️';
+        }
+
+        function autoPickCustomEmoji() {
+            const emojiInput = document.getElementById('cf-emoji');
+            if (emojiInput.dataset.manual === '1') return;
+            emojiInput.value = suggestFoodEmoji(
+                document.getElementById('cf-name').value,
+                document.getElementById('cf-category').value
+            );
+        }
+
+        /**************************************************************
+         * 2D. RECENT FOODS
+         **************************************************************/
+        const RECENT_FOODS_LIMIT = 50;
+        // Foods that were logged once but never saved to the catalog, so they can be re-added from Recent.
+        const recentOnlyFoods = new Map();
+
+        function getTimestampFromId(id) {
+            const match = String(id || '').match(/_(\d{13})/);
+            return match ? Number(match[1]) : 0;
+        }
+
+        function getRecentFoods() {
+            syncActiveDayToLogsMap();
+            const catalog = new Map(getAllFoods().map(f => [f.id, f]));
+            const latest = new Map(); // foodId -> { food, at, kind }
+
+            const consider = (food, at, kind) => {
+                if (!food || !at) return;
+                const prev = latest.get(food.id);
+                if (!prev || at > prev.at) latest.set(food.id, { food, at, kind });
+            };
+
+            Object.values(state.logsByDate).forEach(day => {
+                Object.values(day?.meals || {}).forEach(entries => {
+                    (entries || []).forEach(entry => {
+                        let food = catalog.get(entry.foodId);
+                        if (!food) {
+                            food = {
+                                id: entry.foodId,
+                                name: entry.name,
+                                icon: entry.icon,
+                                category: 'MealPrep',
+                                servingDesc: entry.servingDesc,
+                                grams: entry.baseGrams,
+                                cal: entry.baseCal,
+                                p: entry.baseP,
+                                c: entry.baseC,
+                                f: entry.baseF,
+                                fiber: entry.baseFiber
+                            };
+                            recentOnlyFoods.set(food.id, food);
+                        }
+                        consider(food, entry.addedAt || getTimestampFromId(entry.uid), 'logged');
+                    });
+                });
+            });
+            state.customFoods.forEach(food => consider(food, food.addedAt || getTimestampFromId(food.id), 'added'));
+
+            return [...latest.values()]
+                .sort((a, b) => b.at - a.at)
+                .slice(0, RECENT_FOODS_LIMIT);
+        }
+
+        function formatRecentLabel(at, kind) {
+            const days = Math.floor((Date.now() - at) / 86400000);
+            const when = days <= 0 ? 'today' : days === 1 ? 'yesterday' : `${days}d ago`;
+            return `${kind === 'added' ? 'Added' : 'Logged'} ${when}`;
+        }
+
         function createMealEntry(foodId, servings = 1) {
-            const food = getAllFoods().find(f => f.id === foodId);
+            const food = getAllFoods().find(f => f.id === foodId) || recentOnlyFoods.get(foodId);
             if (!food) return null;
             return {
                 uid: 'uid_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                addedAt: Date.now(),
                 foodId: food.id,
                 name: food.name,
                 icon: food.icon || '🌱',
@@ -2214,17 +2753,28 @@
             const allFoods = getAllFoods();
             document.getElementById('food-count-badge').textContent = `${allFoods.length} Foods`;
 
-            const filtered = allFoods.filter(f => {
-                const matchesCat = state.activeCategory === 'All' || f.category === state.activeCategory;
-                const matchesQuery = !query || f.name.toLowerCase().includes(query) || f.category.toLowerCase().includes(query);
-                return matchesCat && matchesQuery;
-            });
+            const isRecent = state.activeCategory === 'Recent';
+            const matchesQuery = f => !query || f.name.toLowerCase().includes(query) || (f.category || '').toLowerCase().includes(query);
+            const recentLabels = new Map();
+            let filtered;
+            if (isRecent) {
+                filtered = getRecentFoods()
+                    .filter(r => matchesQuery(r.food))
+                    .map(r => {
+                        recentLabels.set(r.food.id, formatRecentLabel(r.at, r.kind));
+                        return r.food;
+                    });
+            } else {
+                filtered = allFoods.filter(f => (state.activeCategory === 'All' || f.category === state.activeCategory) && matchesQuery(f));
+            }
 
             const listEl = document.getElementById('food-db-list');
             if (filtered.length === 0) {
                 listEl.innerHTML = `
                     <div class="p-6 text-center text-slate-400 text-xs">
-                        No vegetarian foods matching "${query}". Click <strong>+ Custom Food</strong> to add your own recipe!
+                        ${isRecent && !query
+                            ? 'Nothing here yet. Foods you log or add will show up here.'
+                            : `No vegetarian foods matching "${query}". Click <strong>+ Custom Food</strong> to add your own recipe!`}
                     </div>
                 `;
                 return;
@@ -2244,6 +2794,7 @@
                                 <span class="text-amber-600 font-semibold">${food.c}C</span>
                                 <span class="text-sky-600 font-semibold">${food.f}F</span>
                                 ${food.fiber ? `<span class="text-emerald-600 font-semibold">${food.fiber} Fiber</span>` : ''}
+                                ${recentLabels.has(food.id) ? `<span class="text-slate-400">• ${recentLabels.get(food.id)}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -2698,12 +3249,14 @@
         function openCustomFoodModal() {
             document.getElementById('cf-meal').value = document.getElementById('active-meal-select').value || 'breakfast';
             document.getElementById('custom-food-modal').classList.remove('hidden');
+            autoPickCustomEmoji();
             setTimeout(() => document.getElementById('cf-name').focus(), 100);
         }
 
         function closeCustomFoodModal() {
             document.getElementById('custom-food-modal').classList.add('hidden');
             document.getElementById('custom-food-form').reset();
+            delete document.getElementById('cf-emoji').dataset.manual;
         }
 
         function autoCalcCustomCalories() {
@@ -2728,12 +3281,15 @@
             const f = Number(document.getElementById('cf-f').value) || 0;
             const fiber = Number(document.getElementById('cf-fiber').value) || 0;
             const saveToDb = document.getElementById('cf-save-db').checked;
+            const category = document.getElementById('cf-category').value || 'MealPrep';
+            const icon = document.getElementById('cf-emoji').value.trim() || suggestFoodEmoji(name, category);
+            const now = Date.now();
 
-            const newFoodId = 'cust_' + Date.now();
+            const newFoodId = 'cust_' + now;
             const newFoodObj = {
                 id: newFoodId,
                 name,
-                category: 'PlantPro',
+                category,
                 servingDesc,
                 grams,
                 cal,
@@ -2741,7 +3297,8 @@
                 c,
                 f,
                 fiber,
-                icon: '🌱'
+                icon,
+                addedAt: now
             };
 
             if (saveToDb) {
@@ -2749,10 +3306,11 @@
             }
 
             state.meals[mealSlot].push({
-                uid: 'uid_' + Date.now(),
+                uid: 'uid_' + now,
+                addedAt: now,
                 foodId: newFoodId,
                 name,
-                icon: '🌱',
+                icon,
                 servingDesc,
                 baseGrams: grams,
                 baseCal: cal,
@@ -2801,7 +3359,9 @@
             syncInputsFromState();
             syncDateBarUI();
             closeResetModal();
+            localStorage.removeItem(PROFILE_COLLAPSED_KEY);
             recalculateAndRender();
+            startOnboarding();
             showToast('Reset all vegetarian data & logs to defaults');
         }
 
@@ -3069,7 +3629,8 @@ Strictly return a valid JSON object matching the requested schema:
 - "fiber": Dietary Fiber in grams per serving (number, rounded to 1 decimal, 0 if ${isDescribe ? 'negligible' : 'not listed'}).
 - "isVegetarian": Boolean (true if meatless/vegetarian; false if meat, poultry, fish, gelatin, lard, or slaughter animal products are detected).
 - "vegetarianNote": Concise explanation of vegetarian status${isDescribe ? ', plus a brief note on the main assumptions behind the estimate (portion size, cooking oil, etc.)' : ' (e.g. "100% vegetarian friendly", or highlight any flagged non-vegetarian ingredients)'}.
-- "suggestedCategory": One of ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep"].
+- "suggestedCategory": One of ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep", "Snacks"] ("Snacks" covers snacks, sweets, and drinks).
+- "emoji": The single most fitting food emoji for this item (e.g. 🌯 for a burrito, 🍕 for pizza, 🥗 for a salad, ☕ for a latte).
 `;
 
             const parts = [];
@@ -3121,8 +3682,9 @@ ${fieldSpec}` });
                             vegetarianNote: { type: "STRING" },
                             suggestedCategory: { 
                                 type: "STRING", 
-                                enum: ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep"] 
-                            }
+                                enum: ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep", "Snacks"] 
+                            },
+                            emoji: { type: "STRING" }
                         },
                         required: ["foodName", "cal", "p", "c", "f", "isVegetarian"]
                     }
@@ -3196,6 +3758,8 @@ ${fieldSpec}` });
             if (data.suggestedCategory) {
                 document.getElementById('scan-res-category').value = data.suggestedCategory;
             }
+            document.getElementById('scan-res-emoji').value = (data.emoji || '').trim()
+                || suggestFoodEmoji(data.foodName, data.suggestedCategory);
 
             const isVeg = data.isVegetarian !== false;
             const banner = document.getElementById('veg-status-banner');
@@ -3230,8 +3794,10 @@ ${fieldSpec}` });
             const category = document.getElementById('scan-res-category').value || 'PlantPro';
             const servingsToLog = Number(document.getElementById('scan-res-servings-to-log').value) || 1;
             const saveToCatalog = document.getElementById('scan-res-save-catalog').checked;
+            const icon = document.getElementById('scan-res-emoji').value.trim() || suggestFoodEmoji(name, category);
+            const now = Date.now();
 
-            const newFoodId = 'scanned_' + Date.now();
+            const newFoodId = 'scanned_' + now;
             const newFoodObj = {
                 id: newFoodId,
                 name: name,
@@ -3243,7 +3809,8 @@ ${fieldSpec}` });
                 c: c,
                 f: f,
                 fiber: fiber,
-                icon: '🌱'
+                icon,
+                addedAt: now
             };
 
             if (saveToCatalog) {
@@ -3252,10 +3819,11 @@ ${fieldSpec}` });
 
             if (servingsToLog > 0) {
                 state.meals[mealSlot].push({
-                    uid: 'uid_' + Date.now(),
+                    uid: 'uid_' + now,
+                    addedAt: now,
                     foodId: newFoodId,
                     name: name,
-                    icon: '🌱',
+                    icon,
                     servingDesc: servingDesc,
                     baseGrams: grams,
                     baseCal: cal,
@@ -3482,6 +4050,7 @@ ${fieldSpec}` });
             renderTargetsAndDashboard();
             renderFoodDatabase();
             renderMealSlots();
+            renderProfileSummary();
             saveState();
         }
 
@@ -3495,6 +4064,8 @@ ${fieldSpec}` });
                 console.error('Cloud sync init failed:', err);
             }
             recalculateAndRender();
+            applyProfileCollapse();
+            if (!state.onboarded) startOnboarding();
         };
     </script>
 </body>
