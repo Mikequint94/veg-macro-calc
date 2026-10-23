@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NutriPulse — 100% Vegetarian Macro & Meal Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -117,6 +118,12 @@
 
             <!-- Quick Template Bar, CSV Export & Actions -->
             <div class="flex items-center gap-1.5 sm:gap-2 order-2 lg:order-3">
+                <!-- Cloud Sync Account Button -->
+                <button id="cloud-sync-btn" onclick="openSyncModal()" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200 transition" title="Sign in to sync your data across devices">
+                    <i id="cloud-sync-icon" class="fa-solid fa-cloud-arrow-up"></i>
+                    <span id="cloud-sync-label" class="hidden sm:inline">Sign in to sync</span>
+                </button>
+
                 <!-- Export Daily Log CSV Button -->
                 <button onclick="exportDailyLogCSV()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20 transition" title="Download today's meal log & macro summary as a CSV spreadsheet">
                     <i class="fa-solid fa-file-csv"></i>
@@ -833,6 +840,55 @@
         </div>
     </div>
 
+    <!-- Cloud Sync Account Modal -->
+    <div id="sync-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+            <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300">
+                        <i class="fa-solid fa-cloud text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-base leading-tight">Sync Across Devices</h3>
+                        <p class="text-[11px] text-sky-200/80">Your logs, profile & custom foods</p>
+                    </div>
+                </div>
+                <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <!-- Signed out -->
+                <form id="sync-signed-out" onsubmit="sendSignInLink(event)" class="space-y-3">
+                    <p class="text-xs text-slate-600">Enter your email and we'll send a sign-in link. Sign in with the same email on your phone and laptop to keep them in sync.</p>
+                    <input id="sync-email-input" type="email" required autocomplete="email" placeholder="you@example.com" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm font-medium">
+                    <button id="sync-send-link-btn" type="submit" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-envelope"></i> Email Me a Sign-In Link
+                    </button>
+                    <p id="sync-link-sent-msg" class="hidden text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+                        Check your inbox and open the link in this browser to finish signing in.
+                    </p>
+                </form>
+
+                <!-- Signed in -->
+                <div id="sync-signed-in" class="hidden space-y-3">
+                    <div class="text-xs text-slate-600">Signed in as <span id="sync-user-email" class="font-bold text-slate-900"></span></div>
+                    <div class="text-xs text-slate-500">Status: <span id="sync-status-detail" class="font-semibold text-slate-700">—</span></div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="syncNow()" class="flex-1 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate"></i> Sync Now
+                        </button>
+                        <button type="button" onclick="signOutOfSync()" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                            Sign Out
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Signing out keeps a copy of your data on this device.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI Nutrition Facts Label Scanner Modal -->
     <div id="scan-label-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in my-auto max-h-[92vh] flex flex-col">
@@ -1318,27 +1374,28 @@
             }, 1500);
         }
 
+        function hydrateState(parsed) {
+            state = {
+                ...getDefaultState(),
+                ...parsed,
+                activeDate: parsed.activeDate || getTodayISO(),
+                profile: {
+                    ...getDefaultState().profile,
+                    ...(parsed.profile || {}),
+                    customPct: { ...getDefaultState().profile.customPct, ...(parsed.profile?.customPct || {}) },
+                    perWeightRate: { ...getDefaultState().profile.perWeightRate, ...(parsed.profile?.perWeightRate || {}) }
+                },
+                customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
+                logsByDate: parsed.logsByDate || {}
+            };
+            loadDateIntoActiveMeals(state.activeDate);
+        }
+
         function loadState() {
             try {
                 let raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
-                    const parsed = JSON.parse(raw);
-                    const today = getTodayISO();
-                    state = {
-                        ...getDefaultState(),
-                        ...parsed,
-                        activeDate: parsed.activeDate || today,
-                        profile: {
-                            ...getDefaultState().profile,
-                            ...(parsed.profile || {}),
-                            customPct: { ...getDefaultState().profile.customPct, ...(parsed.profile?.customPct || {}) },
-                            perWeightRate: { ...getDefaultState().profile.perWeightRate, ...(parsed.profile?.perWeightRate || {}) }
-                        },
-                        customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
-                        logsByDate: parsed.logsByDate || {}
-                    };
-
-                    loadDateIntoActiveMeals(state.activeDate);
+                    hydrateState(JSON.parse(raw));
                 } else {
                     // Seed clean vegetarian starters
                     state = getDefaultState();
@@ -1358,9 +1415,248 @@
                 syncActiveDayToLogsMap();
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 flashStorageSavedBadge();
+                markCloudDirtyIfChanged();
             } catch (err) {
                 console.error('Error saving state:', err);
             }
+        }
+
+        /**************************************************************
+         * 2B. CLOUD SYNC (SUPABASE)
+         **************************************************************/
+        const SUPABASE_URL = 'https://zdlqxgbhzzywbvohqscb.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_sBEwHkg9vh94JvG4gIWhpA_LWr2-ZuV';
+        const SYNC_META_KEY = 'nutripulse_sync_meta';
+        const CLOUD_PUSH_DEBOUNCE_MS = 1500;
+
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { flowType: 'implicit' } });
+            }
+        } catch (err) {
+            console.error('Supabase init failed:', err);
+        }
+        let cloudUser = null;
+        let cloudPushTimer = null;
+        let cloudBusy = false;
+        let lastPayloadJson = null;
+
+        function loadSyncMeta() {
+            try {
+                return { dirty: false, lastSyncedAt: null, localChangedAt: null, ...JSON.parse(localStorage.getItem(SYNC_META_KEY) || '{}') };
+            } catch (e) {
+                return { dirty: false, lastSyncedAt: null, localChangedAt: null };
+            }
+        }
+        let syncMeta = loadSyncMeta();
+
+        function saveSyncMeta() {
+            localStorage.setItem(SYNC_META_KEY, JSON.stringify(syncMeta));
+        }
+
+        // Which day is being viewed is per-device UI state, so it is excluded from what syncs.
+        function getSyncPayload() {
+            syncActiveDayToLogsMap();
+            const { activeDate, meals, waterCups, activeCategory, ...rest } = state;
+            return rest;
+        }
+
+        function resetPayloadBaseline() {
+            lastPayloadJson = JSON.stringify(getSyncPayload());
+        }
+
+        function markCloudDirtyIfChanged() {
+            if (lastPayloadJson === null) return;
+            const json = JSON.stringify(getSyncPayload());
+            if (json === lastPayloadJson) return;
+            lastPayloadJson = json;
+            syncMeta.dirty = true;
+            syncMeta.localChangedAt = new Date().toISOString();
+            saveSyncMeta();
+            scheduleCloudPush();
+        }
+
+        function scheduleCloudPush() {
+            if (!cloudUser) return;
+            clearTimeout(cloudPushTimer);
+            setCloudStatus('pending');
+            cloudPushTimer = setTimeout(pushToCloud, CLOUD_PUSH_DEBOUNCE_MS);
+        }
+
+        async function pushToCloud() {
+            if (!supabaseClient || !cloudUser) return;
+            clearTimeout(cloudPushTimer);
+            const pushedJson = JSON.stringify(getSyncPayload());
+            setCloudStatus('syncing');
+            const { data, error } = await supabaseClient
+                .from('user_state')
+                .upsert({ user_id: cloudUser.id, state: JSON.parse(pushedJson), updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+                .select('updated_at')
+                .single();
+            if (error) {
+                console.error('Cloud push failed:', error);
+                setCloudStatus('error', error.message);
+                return;
+            }
+            syncMeta.lastSyncedAt = data.updated_at;
+            syncMeta.dirty = JSON.stringify(getSyncPayload()) !== pushedJson;
+            saveSyncMeta();
+            if (syncMeta.dirty) scheduleCloudPush();
+            else setCloudStatus('synced');
+        }
+
+        function applyCloudState(remoteState, updatedAt) {
+            hydrateState({ ...remoteState, activeDate: state.activeDate });
+            resetPayloadBaseline();
+            syncMeta.dirty = false;
+            syncMeta.lastSyncedAt = updatedAt;
+            saveSyncMeta();
+            syncInputsFromState();
+            syncDateBarUI();
+            recalculateAndRender();
+        }
+
+        async function pullFromCloud() {
+            if (!supabaseClient || !cloudUser || cloudBusy) return;
+            cloudBusy = true;
+            setCloudStatus('syncing');
+            try {
+                const { data: row, error } = await supabaseClient
+                    .from('user_state')
+                    .select('state, updated_at')
+                    .eq('user_id', cloudUser.id)
+                    .maybeSingle();
+                if (error) throw error;
+
+                if (!row) {
+                    await pushToCloud();
+                } else if (!syncMeta.lastSyncedAt) {
+                    const useCloud = window.confirm(
+                        'Your account already has saved data.\n\nOK: load your account data on this device (replaces what is here now).\nCancel: keep this device\'s data and overwrite your account data.'
+                    );
+                    if (useCloud) {
+                        applyCloudState(row.state, row.updated_at);
+                        setCloudStatus('synced');
+                        showToast('Loaded your data from the cloud');
+                    } else {
+                        await pushToCloud();
+                    }
+                } else if (row.updated_at !== syncMeta.lastSyncedAt) {
+                    const localIsNewer = syncMeta.dirty && syncMeta.localChangedAt && Date.parse(syncMeta.localChangedAt) > Date.parse(row.updated_at);
+                    if (localIsNewer) {
+                        await pushToCloud();
+                    } else {
+                        applyCloudState(row.state, row.updated_at);
+                        setCloudStatus('synced');
+                    }
+                } else if (syncMeta.dirty) {
+                    await pushToCloud();
+                } else {
+                    setCloudStatus('synced');
+                }
+            } catch (err) {
+                console.error('Cloud pull failed:', err);
+                setCloudStatus('error', err.message);
+            } finally {
+                cloudBusy = false;
+            }
+        }
+
+        function setCloudStatus(status, detail = '') {
+            const label = document.getElementById('cloud-sync-label');
+            const icon = document.getElementById('cloud-sync-icon');
+            const statusDetail = document.getElementById('sync-status-detail');
+            const badgeText = document.getElementById('storage-status-text');
+            if (!label || !icon) return;
+
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const views = {
+                signedOut: { label: 'Sign in to sync', icon: 'fa-solid fa-cloud-arrow-up', badge: 'Saved to browser', detail: 'Not signed in' },
+                pending: { label: 'Saving…', icon: 'fa-solid fa-cloud', badge: 'Saving…', detail: 'Changes waiting to sync' },
+                syncing: { label: 'Syncing…', icon: 'fa-solid fa-rotate fa-spin', badge: 'Syncing…', detail: 'Syncing…' },
+                synced: { label: 'Synced', icon: 'fa-solid fa-cloud', badge: `Synced • ${timeStr}`, detail: `Synced at ${timeStr}` },
+                error: { label: 'Sync error', icon: 'fa-solid fa-triangle-exclamation', badge: 'Sync error', detail: `Sync failed: ${detail}` }
+            };
+            const view = views[status] || views.signedOut;
+            label.textContent = view.label;
+            icon.className = view.icon;
+            if (badgeText) badgeText.textContent = view.badge;
+            if (statusDetail) statusDetail.textContent = view.detail;
+        }
+
+        function renderSyncModalState() {
+            document.getElementById('sync-signed-out').classList.toggle('hidden', Boolean(cloudUser));
+            document.getElementById('sync-signed-in').classList.toggle('hidden', !cloudUser);
+            if (cloudUser) document.getElementById('sync-user-email').textContent = cloudUser.email || '';
+        }
+
+        function openSyncModal() {
+            if (!supabaseClient) {
+                showToast('Cloud sync is unavailable (could not load Supabase)');
+                return;
+            }
+            renderSyncModalState();
+            document.getElementById('sync-link-sent-msg').classList.add('hidden');
+            document.getElementById('sync-modal').classList.remove('hidden');
+        }
+
+        function closeSyncModal() {
+            document.getElementById('sync-modal').classList.add('hidden');
+        }
+
+        async function sendSignInLink(e) {
+            e.preventDefault();
+            const email = document.getElementById('sync-email-input').value.trim();
+            const btn = document.getElementById('sync-send-link-btn');
+            btn.disabled = true;
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: window.location.origin + window.location.pathname }
+            });
+            btn.disabled = false;
+            if (error) {
+                showToast(`Could not send link: ${error.message}`);
+                return;
+            }
+            document.getElementById('sync-link-sent-msg').classList.remove('hidden');
+        }
+
+        async function syncNow() {
+            if (syncMeta.dirty) await pushToCloud();
+            else await pullFromCloud();
+        }
+
+        async function signOutOfSync() {
+            if (syncMeta.dirty) await pushToCloud();
+            await supabaseClient.auth.signOut();
+            syncMeta = { dirty: false, lastSyncedAt: null, localChangedAt: null };
+            saveSyncMeta();
+            closeSyncModal();
+            showToast('Signed out. Your data is still saved on this device.');
+        }
+
+        function initCloudSync() {
+            resetPayloadBaseline();
+            if (!supabaseClient) return;
+
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                const wasSignedIn = Boolean(cloudUser);
+                cloudUser = session?.user || null;
+                renderSyncModalState();
+                if (!cloudUser) {
+                    setCloudStatus('signedOut');
+                    return;
+                }
+                // Supabase warns against awaiting its own calls inside this callback.
+                if (!wasSignedIn) setTimeout(pullFromCloud, 0);
+            });
+
+            document.addEventListener('visibilitychange', () => {
+                if (!cloudUser) return;
+                if (document.visibilityState === 'visible') pullFromCloud();
+                else if (syncMeta.dirty) pushToCloud();
+            });
         }
 
         function formatFriendlyDateLabel(dateStr) {
@@ -3193,6 +3489,11 @@ ${fieldSpec}` });
             loadState();
             syncInputsFromState();
             syncDateBarUI();
+            try {
+                initCloudSync();
+            } catch (err) {
+                console.error('Cloud sync init failed:', err);
+            }
             recalculateAndRender();
         };
     </script>
