@@ -863,6 +863,9 @@
                         </label>
                         <input id="scan-hint-name" type="text" placeholder="e.g., Organic Edamame Pasta, Chobani Vanilla..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-xs sm:text-sm font-medium">
                         <p class="text-[11px] text-slate-400 mt-1">Leave blank to let AI detect the product title automatically from the label.</p>
+                        <button type="button" onclick="promptForGeminiApiKey()" class="mt-1 text-[11px] font-semibold text-emerald-700 hover:underline">
+                            <i class="fa-solid fa-key"></i> <span id="gemini-key-status">Set Gemini API key</span>
+                        </button>
                     </div>
 
                     <!-- CAMERA VIEW CONTAINER -->
@@ -2484,6 +2487,29 @@
         let activeMediaStream = null;
         let currentFacingMode = 'environment'; // 'environment' | 'user'
         let uploadedBase64Image = null;
+        const GEMINI_KEY_STORAGE = 'nutripulse_gemini_api_key';
+
+        function getGeminiApiKey() {
+            return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+        }
+
+        function updateGeminiKeyStatus() {
+            const el = document.getElementById('gemini-key-status');
+            if (el) el.textContent = getGeminiApiKey() ? 'Gemini API key saved (change)' : 'Set Gemini API key';
+        }
+
+        function promptForGeminiApiKey() {
+            const entered = window.prompt(
+                'Paste your Gemini API key (free at https://aistudio.google.com/apikey).\nIt is stored only in this browser.',
+                getGeminiApiKey()
+            );
+            if (entered === null) return getGeminiApiKey();
+            const key = entered.trim();
+            if (key) localStorage.setItem(GEMINI_KEY_STORAGE, key);
+            else localStorage.removeItem(GEMINI_KEY_STORAGE);
+            updateGeminiKeyStatus();
+            return key;
+        }
 
         function openScanModal() {
             const selectEl = document.getElementById('active-meal-select');
@@ -2492,6 +2518,7 @@
             if (scanMealSelect) scanMealSelect.value = targetMeal;
 
             document.getElementById('scan-label-modal').classList.remove('hidden');
+            updateGeminiKeyStatus();
             switchScanMethod('camera');
         }
 
@@ -2679,6 +2706,13 @@
         }
 
         async function runGeminiVisionExtraction(fullDataUrl) {
+            const apiKey = getGeminiApiKey() || promptForGeminiApiKey();
+            if (!apiKey) {
+                showToast('A Gemini API key is required to scan labels');
+                backToScanInput();
+                return;
+            }
+
             document.getElementById('scan-step-input').classList.add('hidden');
             document.getElementById('scan-step-loading').classList.remove('hidden');
             document.getElementById('scan-step-review').classList.add('hidden');
@@ -2753,8 +2787,7 @@ Strictly extract and return a valid JSON object matching the requested schema:
                 }
             };
 
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
 
             try {
                 const response = await fetchWithExponentialBackoff(apiUrl, {
@@ -2764,7 +2797,15 @@ Strictly extract and return a valid JSON object matching the requested schema:
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Gemini API error: ${response.statusText} (${response.status})`);
+                    const errBody = await response.json().catch(() => null);
+                    const detail = errBody?.error?.message || response.statusText;
+                    if (response.status === 400 || response.status === 401 || response.status === 403) {
+                        if (/api key/i.test(detail)) {
+                            localStorage.removeItem(GEMINI_KEY_STORAGE);
+                            updateGeminiKeyStatus();
+                        }
+                    }
+                    throw new Error(`Gemini API error (${response.status}): ${detail}`);
                 }
 
                 const result = await response.json();
@@ -2778,7 +2819,7 @@ Strictly extract and return a valid JSON object matching the requested schema:
 
             } catch (err) {
                 console.error('Vision extraction error:', err);
-                showToast('AI could not read label. Opening manual verification form...');
+                showToast(`Scan failed: ${err.message}. Opening manual entry form...`);
                 // Fallback graceful degradation with user hint
                 populateReviewForm({
                     foodName: userHint || 'Scanned Food Item',
