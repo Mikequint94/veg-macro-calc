@@ -213,6 +213,12 @@
                     <span class="hidden sm:inline">Scan Label</span>
                 </button>
 
+                <!-- AI Meal Description Estimator Button -->
+                <button onclick="openScanModal('describe')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/20 transition" title="Describe a restaurant meal and let AI estimate the nutrition">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span class="hidden sm:inline">Describe Meal</span>
+                </button>
+
                 <!-- Custom Food Modal Trigger -->
                 <button onclick="openCustomFoodModal()" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition" title="Create or Quick-Add Custom Food">
                     <i class="fa-solid fa-plus text-emerald-600"></i>
@@ -669,6 +675,9 @@
                                 <button onclick="openScanModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 font-bold text-xs whitespace-nowrap transition flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20">
                                     <i class="fa-solid fa-camera"></i> <span>Scan Label (AI)</span>
                                 </button>
+                                <button onclick="openScanModal('describe')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 font-bold text-xs whitespace-nowrap transition flex items-center justify-center gap-1.5 shadow-sm shadow-amber-500/20">
+                                    <i class="fa-solid fa-utensils"></i> <span>Describe (AI)</span>
+                                </button>
                                 <button onclick="openCustomFoodModal()" class="px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 font-semibold text-xs whitespace-nowrap transition flex items-center justify-center gap-1.5">
                                     <i class="fa-solid fa-bolt"></i> + Custom
                                 </button>
@@ -847,24 +856,43 @@
                 <!-- STEP 1: Capture or Upload Screen -->
                 <div id="scan-step-input" class="space-y-4">
                     <!-- Method Switcher Pills -->
-                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                    <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
                         <button id="scan-tab-camera" onclick="switchScanMethod('camera')" class="py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-sm">
                             <i class="fa-solid fa-video text-emerald-600"></i> Live Camera
                         </button>
                         <button id="scan-tab-upload" onclick="switchScanMethod('upload')" class="py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
                             <i class="fa-solid fa-upload text-teal-600"></i> Upload Photo
                         </button>
+                        <button id="scan-tab-describe" onclick="switchScanMethod('describe')" class="py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+                            <i class="fa-solid fa-utensils text-amber-600"></i> Describe
+                        </button>
                     </div>
 
                     <!-- Optional Item Name Hint -->
                     <div>
-                        <label for="scan-hint-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                            Food Name (Optional Hint)
-                        </label>
-                        <input id="scan-hint-name" type="text" placeholder="e.g., Organic Edamame Pasta, Chobani Vanilla..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-xs sm:text-sm font-medium">
-                        <p class="text-[11px] text-slate-400 mt-1">Leave blank to let AI detect the product title automatically from the label.</p>
+                        <div id="scan-hint-wrapper">
+                            <label for="scan-hint-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                                Food Name (Optional Hint)
+                            </label>
+                            <input id="scan-hint-name" type="text" placeholder="e.g., Organic Edamame Pasta, Chobani Vanilla..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-xs sm:text-sm font-medium">
+                            <p class="text-[11px] text-slate-400 mt-1">Leave blank to let AI detect the product title automatically from the label.</p>
+                        </div>
                         <button type="button" onclick="promptForGeminiApiKey()" class="mt-1 text-[11px] font-semibold text-emerald-700 hover:underline">
                             <i class="fa-solid fa-key"></i> <span id="gemini-key-status">Set Gemini API key</span>
+                        </button>
+                    </div>
+
+                    <!-- DESCRIBE MEAL CONTAINER -->
+                    <div id="describe-view-panel" class="hidden space-y-3">
+                        <div>
+                            <label for="describe-meal-text" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                                Describe What You Ate
+                            </label>
+                            <textarea id="describe-meal-text" rows="4" placeholder="e.g., Chipotle burrito bowl with brown rice, black beans, fajita veggies, cheese, guac, and mild salsa. Ate about 3/4 of it." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-xs sm:text-sm font-medium resize-y"></textarea>
+                            <p class="text-[11px] text-slate-400 mt-1">Include the restaurant, portion size, and ingredients or sides for a better estimate. You can edit every number on the next screen.</p>
+                        </div>
+                        <button type="button" onclick="analyzeMealDescription()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-bold shadow-md shadow-amber-500/30 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Estimate Nutrition with AI
                         </button>
                     </div>
 
@@ -945,7 +973,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="text-sm font-bold text-slate-900">Scanning Nutrition Facts...</div>
+                        <div id="loading-status-title" class="text-sm font-bold text-slate-900">Scanning Nutrition Facts...</div>
                         <div id="loading-status-detail" class="text-xs text-slate-500 mt-0.5">Gemini Vision is reading calories, macros, and checking vegetarian status.</div>
                     </div>
                 </div>
@@ -2511,7 +2539,9 @@
             return key;
         }
 
-        function openScanModal() {
+        let currentScanMethod = 'camera'; // 'camera' | 'upload' | 'describe'
+
+        function openScanModal(method = 'camera') {
             const selectEl = document.getElementById('active-meal-select');
             const targetMeal = selectEl ? selectEl.value : 'breakfast';
             const scanMealSelect = document.getElementById('scan-res-meal');
@@ -2519,7 +2549,7 @@
 
             document.getElementById('scan-label-modal').classList.remove('hidden');
             updateGeminiKeyStatus();
-            switchScanMethod('camera');
+            switchScanMethod(method);
         }
 
         function closeScanModal() {
@@ -2530,22 +2560,20 @@
         }
 
         function switchScanMethod(method) {
-            const cameraBtn = document.getElementById('scan-tab-camera');
-            const uploadBtn = document.getElementById('scan-tab-upload');
-            const cameraPanel = document.getElementById('camera-view-panel');
-            const uploadPanel = document.getElementById('upload-view-panel');
+            currentScanMethod = method;
+            const activeTabClass = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-sm';
+            const inactiveTabClass = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
 
-            if (method === 'camera') {
-                cameraBtn.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-sm';
-                uploadBtn.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
-                cameraPanel.classList.remove('hidden');
-                uploadPanel.classList.add('hidden');
+            ['camera', 'upload', 'describe'].forEach(m => {
+                document.getElementById(`scan-tab-${m}`).className = m === method ? activeTabClass : inactiveTabClass;
+                document.getElementById(`${m}-view-panel`).classList.toggle('hidden', m !== method);
+            });
+            document.getElementById('scan-hint-wrapper').classList.toggle('hidden', method === 'describe');
+
+            const modalOpen = !document.getElementById('scan-label-modal').classList.contains('hidden');
+            if (method === 'camera' && modalOpen) {
                 startCameraStream(currentFacingMode);
             } else {
-                uploadBtn.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-sm';
-                cameraBtn.className = 'py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
-                cameraPanel.classList.add('hidden');
-                uploadPanel.classList.remove('hidden');
                 stopCameraStream();
             }
         }
@@ -2680,7 +2708,16 @@
             document.getElementById('scan-step-input').classList.remove('hidden');
             document.getElementById('scan-step-loading').classList.add('hidden');
             document.getElementById('scan-step-review').classList.add('hidden');
-            switchScanMethod('camera');
+            switchScanMethod(currentScanMethod);
+        }
+
+        function analyzeMealDescription() {
+            const description = (document.getElementById('describe-meal-text').value || '').trim();
+            if (!description) {
+                showToast('Describe what you ate first');
+                return;
+            }
+            runGeminiVisionExtraction(null, description);
         }
 
         async function fetchWithExponentialBackoff(url, options, maxRetries = 3) {
@@ -2705,7 +2742,7 @@
             throw new Error('Network request failed after retries');
         }
 
-        async function runGeminiVisionExtraction(fullDataUrl) {
+        async function runGeminiVisionExtraction(fullDataUrl, mealDescription = '') {
             const apiKey = getGeminiApiKey() || promptForGeminiApiKey();
             if (!apiKey) {
                 showToast('A Gemini API key is required to scan labels');
@@ -2717,49 +2754,58 @@
             document.getElementById('scan-step-loading').classList.remove('hidden');
             document.getElementById('scan-step-review').classList.add('hidden');
 
-            const userHint = (document.getElementById('scan-hint-name').value || '').trim();
+            const isDescribe = Boolean(mealDescription);
+            const userHint = isDescribe ? '' : (document.getElementById('scan-hint-name').value || '').trim();
+            document.getElementById('loading-status-title').textContent = isDescribe ? 'Estimating Nutrition...' : 'Scanning Nutrition Facts...';
+            document.getElementById('loading-status-detail').textContent = isDescribe
+                ? 'Gemini is estimating calories and macros from your description.'
+                : 'Gemini Vision is reading calories, macros, and checking vegetarian status.';
 
-            const match = fullDataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-            if (!match) {
-                showToast('Invalid image data');
-                backToScanInput();
-                return;
-            }
-
-            const mimeType = match[1];
-            const base64Data = match[2];
-
-            const promptText = `
-Analyze this Nutrition Facts label image for an interactive 100% vegetarian macro calculator.
-${userHint ? `The user provided this optional item title hint: "${userHint}".` : ''}
-
-Strictly extract and return a valid JSON object matching the requested schema:
-- "foodName": Exact or best identified product name (use user hint if accurate, or read label title/brand).
-- "servingDesc": Natural serving description (e.g. "1 cup", "2 slices", "1 bar", "100g").
-- "grams": Estimated weight in grams (number only, e.g. 85, 240, 100). Default to 100 if not stated.
+            const fieldSpec = `
+Strictly return a valid JSON object matching the requested schema:
+- "foodName": ${isDescribe ? 'Short, descriptive name for the meal (include the restaurant if mentioned).' : 'Exact or best identified product name (use user hint if accurate, or read label title/brand).'}
+- "servingDesc": Natural serving description (e.g. ${isDescribe ? '"1 bowl", "3/4 burrito", "2 slices"' : '"1 cup", "2 slices", "1 bar", "100g"'}).
+- "grams": Estimated weight in grams (number only, e.g. 85, 240, 100).${isDescribe ? '' : ' Default to 100 if not stated.'}
 - "cal": Calories per serving (number).
 - "p": Protein in grams per serving (number, rounded to 1 decimal).
 - "c": Total Carbohydrates in grams per serving (number, rounded to 1 decimal).
 - "f": Total Fat in grams per serving (number, rounded to 1 decimal).
-- "fiber": Dietary Fiber in grams per serving (number, rounded to 1 decimal, 0 if not listed).
+- "fiber": Dietary Fiber in grams per serving (number, rounded to 1 decimal, 0 if ${isDescribe ? 'negligible' : 'not listed'}).
 - "isVegetarian": Boolean (true if meatless/vegetarian; false if meat, poultry, fish, gelatin, lard, or slaughter animal products are detected).
-- "vegetarianNote": Concise explanation of vegetarian status (e.g. "100% vegetarian friendly", or highlight any flagged non-vegetarian ingredients).
+- "vegetarianNote": Concise explanation of vegetarian status${isDescribe ? ', plus a brief note on the main assumptions behind the estimate (portion size, cooking oil, etc.)' : ' (e.g. "100% vegetarian friendly", or highlight any flagged non-vegetarian ingredients)'}.
 - "suggestedCategory": One of ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep"].
 `;
+
+            const parts = [];
+            if (isDescribe) {
+                parts.push({ text: `
+Estimate the nutrition for this meal for an interactive 100% vegetarian macro calculator.
+The user ate this (often a restaurant meal with no published label):
+"""${mealDescription}"""
+
+Use published restaurant nutrition data if you know it; otherwise estimate from typical recipes and portion sizes.
+Restaurant portions usually include more oil and butter than home cooking, so account for that.
+Values should cover the full amount described as one serving (e.g. if they ate 3/4 of a dish, report 3/4 of it).
+${fieldSpec}` });
+            } else {
+                const match = fullDataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+                if (!match) {
+                    showToast('Invalid image data');
+                    backToScanInput();
+                    return;
+                }
+                parts.push({ text: `
+Analyze this Nutrition Facts label image for an interactive 100% vegetarian macro calculator.
+${userHint ? `The user provided this optional item title hint: "${userHint}".` : ''}
+${fieldSpec}` });
+                parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+            }
 
             const payload = {
                 contents: [
                     {
                         role: "user",
-                        parts: [
-                            { text: promptText },
-                            {
-                                inlineData: {
-                                    mimeType: mimeType,
-                                    data: base64Data
-                                }
-                            }
-                        ]
+                        parts
                     }
                 ],
                 generationConfig: {
@@ -2816,13 +2862,14 @@ Strictly extract and return a valid JSON object matching the requested schema:
 
                 const parsed = JSON.parse(jsonText);
                 populateReviewForm(parsed);
+                document.getElementById('scan-res-save-catalog').checked = !isDescribe;
 
             } catch (err) {
                 console.error('Vision extraction error:', err);
-                showToast(`Scan failed: ${err.message}. Opening manual entry form...`);
+                showToast(`${isDescribe ? 'Estimate' : 'Scan'} failed: ${err.message}. Opening manual entry form...`);
                 // Fallback graceful degradation with user hint
                 populateReviewForm({
-                    foodName: userHint || 'Scanned Food Item',
+                    foodName: userHint || (isDescribe ? mealDescription.slice(0, 60) : 'Scanned Food Item'),
                     servingDesc: '1 serving',
                     grams: 100,
                     cal: 150,
