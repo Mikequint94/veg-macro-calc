@@ -311,7 +311,7 @@
                                 <circle id="calorie-ring-circle" cx="80" cy="80" r="66" fill="none" stroke="#10b981" stroke-width="14" stroke-linecap="round" stroke-dasharray="414.69" stroke-dashoffset="414.69" class="ring-transition"></circle>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
-                                <span id="ring-main-label" class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Remaining</span>
+                                <span id="ring-main-label" class="text-[9px] sm:text-[11px] font-bold uppercase tracking-wide text-slate-400">Remaining</span>
                                 <span id="ring-calories-value" class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">2,236</span>
                                 <span class="text-[11px] font-medium text-slate-500">kcal</span>
                                 <div class="mt-1 px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-semibold text-slate-600">
@@ -3421,13 +3421,13 @@
 
             if (calDiff >= 0) {
                 ringMainLabel.textContent = 'Remaining';
-                ringMainLabel.className = 'text-[11px] font-bold uppercase tracking-wider text-slate-400';
+                ringMainLabel.className = 'text-[9px] sm:text-[11px] font-bold uppercase tracking-wide text-slate-400';
                 ringCalValue.textContent = calDiff.toLocaleString();
                 ringCalValue.className = 'text-2xl font-extrabold text-slate-900 tracking-tight';
                 ringEl.setAttribute('stroke', '#10b981');
             } else {
-                ringMainLabel.textContent = 'Over Target';
-                ringMainLabel.className = 'text-[11px] font-bold uppercase tracking-wider text-rose-500';
+                ringMainLabel.textContent = 'Over';
+                ringMainLabel.className = 'text-[9px] sm:text-[11px] font-bold uppercase tracking-wide text-rose-500';
                 ringCalValue.textContent = '+' + Math.abs(calDiff).toLocaleString();
                 ringCalValue.className = 'text-2xl font-extrabold text-rose-600 tracking-tight';
                 ringEl.setAttribute('stroke', '#f43f5e');

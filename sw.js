@@ -1,4 +1,4 @@
-const CACHE = 'nutripulse-v1';
+const CACHE = 'nutripulse-v2';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/apple-touch-icon.png'];
 // Live data and AI calls must never be served from cache.
 const NEVER_CACHE = ['supabase.co', 'generativelanguage.googleapis.com'];
@@ -24,7 +24,7 @@ self.addEventListener('fetch', (event) => {
     // Pages: network first so deploys show up right away, cache as an offline fallback.
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request)
+            fetch(request, { cache: 'no-cache' })
                 .then(response => {
                     const copy = response.clone();
                     caches.open(CACHE).then(cache => cache.put('./index.html', copy));
