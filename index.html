@@ -299,19 +299,12 @@
             <section class="lg:col-span-7 flex flex-col gap-5">
                 <!-- Live Daily Nutrition Progress Dashboard -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5">
-                    <!-- Date & Quick Export Toolbar inside Dashboard -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                            <h3 class="font-bold text-sm sm:text-base text-slate-800"><span id="dashboard-date-label" class="text-emerald-700">Today</span></h3>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col md:flex-row items-center gap-6">
+<span id="dashboard-date-label" class="hidden"></span>
+                    <div class="flex flex-row items-center gap-4 sm:gap-6">
                         
                         <!-- Multi-Ring Donut Chart -->
-                        <div class="relative w-44 h-44 flex items-center justify-center shrink-0">
-                            <svg class="w-44 h-44 -rotate-90" viewBox="0 0 160 160">
+                        <div class="relative w-32 h-32 sm:w-44 sm:h-44 flex items-center justify-center shrink-0">
+                            <svg class="w-32 h-32 sm:w-44 sm:h-44 -rotate-90" viewBox="0 0 160 160">
                                 <!-- Background Track Ring -->
                                 <circle cx="80" cy="80" r="66" fill="none" stroke="#f1f5f9" stroke-width="14"></circle>
                                 <!-- Calorie Progress Ring -->
@@ -319,7 +312,7 @@
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
                                 <span id="ring-main-label" class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Remaining</span>
-                                <span id="ring-calories-value" class="text-2xl font-extrabold text-slate-900 tracking-tight">2,236</span>
+                                <span id="ring-calories-value" class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">2,236</span>
                                 <span class="text-[11px] font-medium text-slate-500">kcal</span>
                                 <div class="mt-1 px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-semibold text-slate-600">
                                     <span id="ring-consumed-kcal">0</span> / <span id="ring-target-kcal">2,236</span>
@@ -335,7 +328,7 @@
                                     <div class="flex items-center gap-2">
                                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
                                         <span class="text-xs font-bold text-slate-800">Protein</span>
-                                        <span id="bar-p-rem" class="text-[11px] text-slate-400 font-medium">(168g left)</span>
+                                        <span id="bar-p-rem" class="hidden sm:inline text-[11px] text-slate-400 font-medium">(168g left)</span>
                                     </div>
                                     <div class="text-xs font-bold text-slate-800">
                                         <span id="bar-p-consumed" class="text-rose-600">0</span> / <span id="bar-p-target">168</span>g
@@ -351,8 +344,8 @@
                                 <div class="flex justify-between items-baseline mb-1">
                                     <div class="flex items-center gap-2">
                                         <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                        <span class="text-xs font-bold text-slate-800">Carbohydrates</span>
-                                        <span id="bar-c-rem" class="text-[11px] text-slate-400 font-medium">(224g left)</span>
+                                        <span class="text-xs font-bold text-slate-800">Carbs</span>
+                                        <span id="bar-c-rem" class="hidden sm:inline text-[11px] text-slate-400 font-medium">(224g left)</span>
                                     </div>
                                     <div class="text-xs font-bold text-slate-800">
                                         <span id="bar-c-consumed" class="text-amber-600">0</span> / <span id="bar-c-target">224</span>g
@@ -369,7 +362,7 @@
                                     <div class="flex items-center gap-2">
                                         <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
                                         <span class="text-xs font-bold text-slate-800">Fats</span>
-                                        <span id="bar-f-rem" class="text-[11px] text-slate-400 font-medium">(75g left)</span>
+                                        <span id="bar-f-rem" class="hidden sm:inline text-[11px] text-slate-400 font-medium">(75g left)</span>
                                     </div>
                                     <div class="text-xs font-bold text-slate-800">
                                         <span id="bar-f-consumed" class="text-sky-600">0</span> / <span id="bar-f-target">75</span>g
@@ -381,7 +374,7 @@
                             </div>
 
                             <!-- Secondary Trackers: Dietary Fiber & Hydration -->
-                            <div class="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                                 <!-- Fiber Box -->
                                 <div class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-between">
                                     <div class="flex items-center gap-2">
@@ -743,7 +736,7 @@
 
     <!-- Add Food Sheet -->
     <div id="add-sheet" class="hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4" onclick="if (event.target === this) closeAddSheet()">
-        <div id="food-finder-card" class="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-sheet">
+        <div id="food-finder-card" class="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col h-[88vh] sm:h-[80vh] animate-sheet">
             <div class="sm:hidden flex justify-center pt-2.5"><span class="w-10 h-1.5 rounded-full bg-slate-300"></span></div>
             <div class="px-4 sm:px-5 pt-3 pb-3 flex items-center justify-between gap-3 border-b border-slate-100">
                 <div class="flex items-center gap-2 min-w-0">
@@ -773,7 +766,7 @@
                         <div class="flex flex-col sm:flex-row gap-2">
                             <div class="relative flex-1">
                                 <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                                <input id="food-search-input" type="text" placeholder="Search seitan, tofu, tempeh, Greek yogurt, lentils, cowboy caviar, paneer..." oninput="renderFoodDatabase()" class="w-full pl-9 pr-8 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm">
+                                <input id="food-search-input" type="text" placeholder="Search foods, e.g. tofu, lentils, paneer" oninput="renderFoodDatabase()" class="w-full pl-9 pr-8 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm">
                                 <button onclick="clearFoodSearch()" id="clear-search-btn" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
@@ -1344,10 +1337,10 @@
     </div>
 
     <!-- Footer -->
-    <footer class="mt-12 border-t border-slate-200/80 bg-white py-5">
+    <footer class="hidden lg:block mt-12 border-t border-slate-200/80 bg-white py-5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
-            <div>NutriPulse 100% Vegetarian Macro & Meal Calculator • Scientific Mifflin-St Jeor TDEE Engine</div>
-            <div>All profile metrics & vegetarian meal logs automatically saved to browser storage</div>
+            <div>NutriPulse • Vegetarian calorie & macro tracker</div>
+            <div>Targets use the Mifflin-St Jeor equation. Your data saves automatically.</div>
         </div>
     </footer>
 
@@ -2891,7 +2884,6 @@
             loadDateIntoActiveMeals(newDateStr);
             syncDateBarUI();
             recalculateAndRender();
-            showToast(`Viewing log for ${formatFriendlyDateLabel(newDateStr)}`);
         }
 
         function changeDateByOffset(deltaDays) {
@@ -3468,10 +3460,10 @@
             const remEl = document.getElementById(`bar-${key}-rem`);
             if (rem >= 0) {
                 remEl.textContent = `(${rem}g left)`;
-                remEl.className = 'text-[11px] text-slate-400 font-medium';
+                remEl.className = 'hidden sm:inline text-[11px] text-slate-400 font-medium';
             } else {
                 remEl.textContent = `(${Math.abs(rem)}g over)`;
-                remEl.className = 'text-[11px] text-rose-500 font-semibold';
+                remEl.className = 'hidden sm:inline text-[11px] text-rose-500 font-semibold';
             }
         }
 
@@ -4885,6 +4877,7 @@ ${fieldSpec}` });
                 };
                 toast.appendChild(btn);
             }
+            while (container.children.length >= 2) container.firstElementChild.remove();
             container.appendChild(toast);
             setTimeout(dismiss, onAction ? 5000 : 2400);
         }
