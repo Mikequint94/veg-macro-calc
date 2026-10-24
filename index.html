@@ -140,6 +140,8 @@
             width: 100%; padding: 12px 16px; border-radius: 16px; border: 1px solid #cbd5e1; background: #fff;
             font-size: 17px; font-weight: 700; color: #0f172a; outline: none;
         }
+        .ob-input { -moz-appearance: textfield; appearance: textfield; padding-right: 3.5rem; }
+        .ob-input::-webkit-outer-spin-button, .ob-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .ob-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
 
         /* Dark mode */
@@ -1113,9 +1115,7 @@
                             <input id="scan-hint-name" type="text" placeholder="e.g., Organic Edamame Pasta, Chobani Vanilla..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-xs sm:text-sm font-medium">
                             <p class="text-[11px] text-slate-400 mt-1">Leave blank to let AI detect the product title automatically from the label.</p>
                         </div>
-                        <button type="button" onclick="promptForGeminiApiKey()" class="mt-1 text-[11px] font-semibold text-emerald-700 hover:underline">
-                            <i class="fa-solid fa-key"></i> <span id="gemini-key-status">Set Gemini API key</span>
-                        </button>
+                        <p id="ai-access-note" class="mt-1 text-[11px] text-slate-400"></p>
                     </div>
 
                     <!-- DESCRIBE MEAL CONTAINER -->
@@ -1921,6 +1921,7 @@
             document.getElementById('sync-signed-out').classList.toggle('hidden', Boolean(cloudUser));
             document.getElementById('sync-signed-in').classList.toggle('hidden', !cloudUser);
             if (cloudUser) document.getElementById('sync-user-email').textContent = cloudUser.email || '';
+            updateAiAccessNote();
         }
 
         function openSyncModal() {
@@ -4160,28 +4161,42 @@
         let activeMediaStream = null;
         let currentFacingMode = 'environment'; // 'environment' | 'user'
         let uploadedBase64Image = null;
-        const GEMINI_KEY_STORAGE = 'nutripulse_gemini_api_key';
+        const AI_FUNCTION_NAME = 'gemini-proxy';
+        const AI_MAX_IMAGE_SIDE = 1600;
+        localStorage.removeItem('nutripulse_gemini_api_key');
 
-        function getGeminiApiKey() {
-            return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+        function updateAiAccessNote() {
+            const el = document.getElementById('ai-access-note');
+            if (!el) return;
+            el.innerHTML = cloudUser
+                ? '<i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i> AI scans are free while you\'re signed in, with a daily limit.'
+                : '<i class="fa-solid fa-lock"></i> <button type="button" onclick="closeScanModal(); openSyncModal()" class="font-semibold text-emerald-700 hover:underline">Sign in with your email</button> to use AI scans. It\'s free.';
         }
 
-        function updateGeminiKeyStatus() {
-            const el = document.getElementById('gemini-key-status');
-            if (el) el.textContent = getGeminiApiKey() ? 'Gemini API key saved (change)' : 'Set Gemini API key';
+        // Phone photos can be 10+ MB; the label stays readable at this size and uploads fast.
+        function shrinkImageDataUrl(dataUrl, maxSide = AI_MAX_IMAGE_SIDE) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.85));
+                };
+                img.onerror = () => resolve(dataUrl);
+                img.src = dataUrl;
+            });
         }
 
-        function promptForGeminiApiKey() {
-            const entered = window.prompt(
-                'Paste your Gemini API key (free at https://aistudio.google.com/apikey).\nIt is stored only in this browser.',
-                getGeminiApiKey()
-            );
-            if (entered === null) return getGeminiApiKey();
-            const key = entered.trim();
-            if (key) localStorage.setItem(GEMINI_KEY_STORAGE, key);
-            else localStorage.removeItem(GEMINI_KEY_STORAGE);
-            updateGeminiKeyStatus();
-            return key;
+        async function requestAiNutrition(body) {
+            const { data, error } = await supabaseClient.functions.invoke(AI_FUNCTION_NAME, { body });
+            if (error) {
+                const detail = await error.context?.json?.().catch(() => null);
+                throw new Error(detail?.error || error.message || 'AI request failed');
+            }
+            return data;
         }
 
         let currentScanMethod = 'camera'; // 'camera' | 'upload' | 'describe'
@@ -4193,7 +4208,7 @@
             if (scanMealSelect) scanMealSelect.value = targetMeal;
 
             document.getElementById('scan-label-modal').classList.remove('hidden');
-            updateGeminiKeyStatus();
+            updateAiAccessNote();
             switchScanMethod(method);
         }
 
@@ -4365,33 +4380,11 @@
             runGeminiVisionExtraction(null, description);
         }
 
-        async function fetchWithExponentialBackoff(url, options, maxRetries = 3) {
-            let delay = 1000;
-            for (let i = 0; i <= maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) return response;
-                    if (response.status === 429 || response.status >= 500) {
-                        if (i === maxRetries) throw new Error(`Server returned HTTP ${response.status}`);
-                        await new Promise(r => setTimeout(r, delay));
-                        delay *= 2;
-                        continue;
-                    }
-                    return response;
-                } catch (err) {
-                    if (i === maxRetries) throw err;
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
-                }
-            }
-            throw new Error('Network request failed after retries');
-        }
-
         async function runGeminiVisionExtraction(fullDataUrl, mealDescription = '') {
-            const apiKey = getGeminiApiKey() || promptForGeminiApiKey();
-            if (!apiKey) {
-                showToast('A Gemini API key is required to scan labels');
-                backToScanInput();
+            if (!supabaseClient || !cloudUser) {
+                showToast('Sign in with your email to use AI scans. It\'s free.');
+                closeScanModal();
+                openSyncModal();
                 return;
             }
 
@@ -4403,111 +4396,23 @@
             const userHint = isDescribe ? '' : (document.getElementById('scan-hint-name').value || '').trim();
             document.getElementById('loading-status-title').textContent = isDescribe ? 'Estimating Nutrition...' : 'Scanning Nutrition Facts...';
             document.getElementById('loading-status-detail').textContent = isDescribe
-                ? 'Gemini is estimating calories and macros from your description.'
-                : 'Gemini Vision is reading calories, macros, and checking vegetarian status.';
-
-            const fieldSpec = `
-Strictly return a valid JSON object matching the requested schema:
-- "foodName": ${isDescribe ? 'Short, descriptive name for the meal (include the restaurant if mentioned).' : 'Exact or best identified product name (use user hint if accurate, or read label title/brand).'}
-- "servingDesc": Natural serving description (e.g. ${isDescribe ? '"1 bowl", "3/4 burrito", "2 slices"' : '"1 cup", "2 slices", "1 bar", "100g"'}).
-- "grams": Estimated weight in grams (number only, e.g. 85, 240, 100).${isDescribe ? '' : ' Default to 100 if not stated.'}
-- "cal": Calories per serving (number).
-- "p": Protein in grams per serving (number, rounded to 1 decimal).
-- "c": Total Carbohydrates in grams per serving (number, rounded to 1 decimal).
-- "f": Total Fat in grams per serving (number, rounded to 1 decimal).
-- "fiber": Dietary Fiber in grams per serving (number, rounded to 1 decimal, 0 if ${isDescribe ? 'negligible' : 'not listed'}).
-- "isVegetarian": Boolean (true if meatless/vegetarian; false if meat, poultry, fish, gelatin, lard, or slaughter animal products are detected).
-- "vegetarianNote": Concise explanation of vegetarian status${isDescribe ? ', plus a brief note on the main assumptions behind the estimate (portion size, cooking oil, etc.)' : ' (e.g. "100% vegetarian friendly", or highlight any flagged non-vegetarian ingredients)'}.
-- "suggestedCategory": One of ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep", "Snacks"] ("Snacks" covers snacks, sweets, and drinks).
-- "emoji": The single most fitting food emoji for this item (e.g. 🌯 for a burrito, 🍕 for pizza, 🥗 for a salad, ☕ for a latte).
-`;
-
-            const parts = [];
-            if (isDescribe) {
-                parts.push({ text: `
-Estimate the nutrition for this meal for an interactive 100% vegetarian macro calculator.
-The user ate this (often a restaurant meal with no published label):
-"""${mealDescription}"""
-
-Use published restaurant nutrition data if you know it; otherwise estimate from typical recipes and portion sizes.
-Restaurant portions usually include more oil and butter than home cooking, so account for that.
-Values should cover the full amount described as one serving (e.g. if they ate 3/4 of a dish, report 3/4 of it).
-${fieldSpec}` });
-            } else {
-                const match = fullDataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-                if (!match) {
-                    showToast('Invalid image data');
-                    backToScanInput();
-                    return;
-                }
-                parts.push({ text: `
-Analyze this Nutrition Facts label image for an interactive 100% vegetarian macro calculator.
-${userHint ? `The user provided this optional item title hint: "${userHint}".` : ''}
-${fieldSpec}` });
-                parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
-            }
-
-            const payload = {
-                contents: [
-                    {
-                        role: "user",
-                        parts
-                    }
-                ],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            foodName: { type: "STRING" },
-                            servingDesc: { type: "STRING" },
-                            grams: { type: "NUMBER" },
-                            cal: { type: "NUMBER" },
-                            p: { type: "NUMBER" },
-                            c: { type: "NUMBER" },
-                            f: { type: "NUMBER" },
-                            fiber: { type: "NUMBER" },
-                            isVegetarian: { type: "BOOLEAN" },
-                            vegetarianNote: { type: "STRING" },
-                            suggestedCategory: { 
-                                type: "STRING", 
-                                enum: ["PlantPro", "DairyEggs", "Legumes", "Grains", "Produce", "FatsSeeds", "MealPrep", "Snacks"] 
-                            },
-                            emoji: { type: "STRING" }
-                        },
-                        required: ["foodName", "cal", "p", "c", "f", "isVegetarian"]
-                    }
-                }
-            };
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`;
+                ? 'AI is estimating calories and macros from your description.'
+                : 'AI is reading calories, macros, and checking vegetarian status.';
 
             try {
-                const response = await fetchWithExponentialBackoff(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errBody = await response.json().catch(() => null);
-                    const detail = errBody?.error?.message || response.statusText;
-                    if (response.status === 400 || response.status === 401 || response.status === 403) {
-                        if (/api key/i.test(detail)) {
-                            localStorage.removeItem(GEMINI_KEY_STORAGE);
-                            updateGeminiKeyStatus();
-                        }
-                    }
-                    throw new Error(`Gemini API error (${response.status}): ${detail}`);
+                let body;
+                if (isDescribe) {
+                    body = { mode: 'describe', description: mealDescription };
+                } else {
+                    const match = (await shrinkImageDataUrl(fullDataUrl)).match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+                    if (!match) throw new Error('Invalid image data');
+                    body = { mode: 'label', hint: userHint, image: { mimeType: match[1], data: match[2] } };
                 }
 
-                const result = await response.json();
-                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!jsonText) {
-                    throw new Error('Gemini API did not return readable nutrition label text.');
+                const { result: parsed, remaining } = await requestAiNutrition(body);
+                if (typeof remaining === 'number' && remaining <= 5) {
+                    showToast(`${remaining} AI scan${remaining === 1 ? '' : 's'} left today`);
                 }
-
-                const parsed = JSON.parse(jsonText);
                 populateReviewForm(parsed);
                 document.getElementById('scan-res-save-catalog').checked = !isDescribe;
 
