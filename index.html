@@ -312,13 +312,13 @@
                                         <span class="absolute right-2.5 top-2 text-xs text-slate-400">ft</span>
                                     </div>
                                     <div class="relative">
-                                        <input id="input-height-in" type="number" min="0" max="11" value="10" oninput="handleHeightWeightInput('imperial')" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
+                                        <input id="input-height-in" type="number" min="0" max="11.9" step="0.1" value="10" oninput="handleHeightWeightInput('imperial')" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
                                         <span class="absolute right-2.5 top-2 text-xs text-slate-400">in</span>
                                     </div>
                                 </div>
                                 <!-- Metric Height -->
                                 <div id="height-metric-group" class="hidden relative">
-                                    <input id="input-height-cm" type="number" min="100" max="250" value="178" oninput="handleHeightWeightInput('metric')" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
+                                    <input id="input-height-cm" type="number" min="100" max="250" step="0.1" value="178" oninput="handleHeightWeightInput('metric')" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
                                     <span class="absolute right-3 top-2 text-xs text-slate-400">cm</span>
                                 </div>
                             </div>
@@ -327,11 +327,11 @@
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Weight</label>
                                 <div id="weight-imperial-group" class="relative">
-                                    <input id="input-weight-lbs" type="number" min="65" max="600" step="0.5" value="172" oninput="handleHeightWeightInput('imperial')" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
+                                    <input id="input-weight-lbs" type="number" min="65" max="600" step="0.1" value="172" oninput="handleHeightWeightInput('imperial')" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
                                     <span class="absolute right-3 top-2 text-xs text-slate-400">lbs</span>
                                 </div>
                                 <div id="weight-metric-group" class="hidden relative">
-                                    <input id="input-weight-kg" type="number" min="30" max="270" step="0.5" value="78" oninput="handleHeightWeightInput('metric')" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
+                                    <input id="input-weight-kg" type="number" min="30" max="270" step="0.1" value="78" oninput="handleHeightWeightInput('metric')" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-semibold text-slate-800 text-sm">
                                     <span class="absolute right-3 top-2 text-xs text-slate-400">kg</span>
                                 </div>
                             </div>
@@ -375,7 +375,7 @@
                         <!-- Custom Calorie Input (Shown when Goal = Custom) -->
                         <div id="custom-Calories-box" class="hidden pt-1">
                             <label for="input-custom-kcal" class="block text-xs font-semibold uppercase tracking-wider text-emerald-700 mb-1">Custom Daily Calorie Target (kcal)</label>
-                            <input id="input-custom-kcal" type="number" min="1000" max="6000" step="25" value="2200" oninput="handleMetricsChange()" class="w-full px-3.5 py-2 rounded-xl border border-emerald-300 bg-emerald-50/40 focus:border-emerald-500 outline-none font-bold text-slate-800 text-sm">
+                            <input id="input-custom-kcal" type="number" min="1000" max="6000" step="0.1" value="2200" oninput="handleMetricsChange()" class="w-full px-3.5 py-2 rounded-xl border border-emerald-300 bg-emerald-50/40 focus:border-emerald-500 outline-none font-bold text-slate-800 text-sm">
                         </div>
 
                         <!-- BMR / TDEE / Target Summary Ribbon -->
@@ -775,36 +775,36 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Grams per Serving</label>
-                        <input id="cf-grams" type="number" min="1" max="2000" value="100" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                        <input id="cf-grams" type="number" min="0.1" max="2000" step="0.1" value="100" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
                     </div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold uppercase text-slate-500">Nutrition per Serving</span>
-                        <button type="button" onclick="autoCalcCustomCalories()" class="text-[11px] font-semibold text-emerald-600 hover:underline">Auto-calc kcal from macros</button>
+                        <button type="button" onclick="autoCalcCustomCalories(true)" class="text-[11px] font-semibold text-emerald-600 hover:underline">Auto-calc kcal from macros</button>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-bold text-emerald-700 mb-1">Calories *</label>
-                            <input id="cf-kcal" type="number" min="0" max="5000" required placeholder="350" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-bold text-sm">
+                            <input id="cf-kcal" type="number" min="0" max="5000" step="0.1" required placeholder="350" oninput="this.dataset.manual = this.value === '' ? '' : '1'" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-bold text-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-rose-600 mb-1">Protein (g) *</label>
-                            <input id="cf-p" type="number" min="0" max="500" step="0.5" required placeholder="32" oninput="autoCalcCustomCalories()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            <input id="cf-p" type="number" min="0" max="500" step="0.1" required placeholder="32" oninput="autoCalcCustomCalories()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-amber-600 mb-1">Carbs (g) *</label>
-                            <input id="cf-c" type="number" min="0" max="500" step="0.5" required placeholder="28" oninput="autoCalcCustomCalories()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            <input id="cf-c" type="number" min="0" max="500" step="0.1" required placeholder="28" oninput="autoCalcCustomCalories()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-sky-600 mb-1">Fat (g) *</label>
-                            <input id="cf-f" type="number" min="0" max="500" step="0.5" required placeholder="12" oninput="autoCalcCustomCalories()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            <input id="cf-f" type="number" min="0" max="500" step="0.1" required placeholder="12" oninput="autoCalcCustomCalories()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
                         </div>
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-emerald-700 mb-1">Dietary Fiber (g)</label>
-                        <input id="cf-fiber" type="number" min="0" max="100" step="0.5" placeholder="3" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                        <input id="cf-fiber" type="number" min="0" max="100" step="0.1" placeholder="3" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
                     </div>
                 </div>
 
@@ -1170,7 +1170,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Grams / Milliliters</label>
-                                <input id="scan-res-grams" type="number" min="1" max="5000" step="1" required class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs font-semibold">
+                                <input id="scan-res-grams" type="number" min="0.1" max="5000" step="0.1" required class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs font-semibold">
                             </div>
                         </div>
 
@@ -1183,25 +1183,25 @@
                             <div class="grid grid-cols-4 gap-2">
                                 <div>
                                     <label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Calories</label>
-                                    <input id="scan-res-cal" type="number" min="0" max="4000" step="1" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-extrabold text-xs text-slate-900">
+                                    <input id="scan-res-cal" type="number" min="0" max="4000" step="0.1" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-extrabold text-xs text-slate-900">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-rose-600 mb-0.5">Protein (g)</label>
-                                    <input id="scan-res-p" type="number" min="0" max="300" step="0.5" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-bold text-xs text-slate-900">
+                                    <input id="scan-res-p" type="number" min="0" max="300" step="0.1" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-bold text-xs text-slate-900">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-amber-600 mb-0.5">Carbs (g)</label>
-                                    <input id="scan-res-c" type="number" min="0" max="300" step="0.5" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-bold text-xs text-slate-900">
+                                    <input id="scan-res-c" type="number" min="0" max="300" step="0.1" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-bold text-xs text-slate-900">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-sky-600 mb-0.5">Fat (g)</label>
-                                    <input id="scan-res-f" type="number" min="0" max="300" step="0.5" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-bold text-xs text-slate-900">
+                                    <input id="scan-res-f" type="number" min="0" max="300" step="0.1" required class="w-full px-2 py-1 rounded-lg border border-slate-200 font-bold text-xs text-slate-900">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2 pt-1">
                                 <div>
                                     <label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Dietary Fiber (g)</label>
-                                    <input id="scan-res-fiber" type="number" min="0" max="100" step="0.5" value="0" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
+                                    <input id="scan-res-fiber" type="number" min="0" max="100" step="0.1" value="0" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-700 mb-0.5">Category</label>
@@ -1223,7 +1223,7 @@
                         <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200/80 flex flex-wrap items-center justify-between gap-2">
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-bold text-emerald-900">Servings to Log Now:</span>
-                                <input id="scan-res-servings-to-log" type="number" min="0" max="10" step="0.25" value="1" class="w-16 px-2 py-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold text-slate-900 text-center">
+                                <input id="scan-res-servings-to-log" type="number" min="0" max="10" step="0.1" value="1" class="w-16 px-2 py-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold text-slate-900 text-center">
                             </div>
                             <div class="flex items-center gap-2 text-xs">
                                 <input id="scan-res-save-catalog" type="checkbox" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
@@ -2402,16 +2402,16 @@
             document.getElementById('input-age').value = p.age;
             document.getElementById('input-activity').value = String(p.activity);
 
-            const totalInches = Math.round(p.heightCm / 2.54);
+            const roundTenth = n => Math.round(n * 10) / 10;
+            const totalInches = roundTenth(p.heightCm / 2.54);
             const ft = Math.floor(totalInches / 12);
-            const inches = totalInches % 12;
+            const inches = roundTenth(totalInches - ft * 12);
             document.getElementById('input-height-ft').value = ft;
             document.getElementById('input-height-in').value = inches;
-            document.getElementById('input-height-cm').value = Math.round(p.heightCm);
+            document.getElementById('input-height-cm').value = roundTenth(p.heightCm);
 
-            const lbs = Math.round(p.weightKg * 2.20462 * 2) / 2;
-            document.getElementById('input-weight-lbs').value = lbs;
-            document.getElementById('input-weight-kg').value = Math.round(p.weightKg * 2) / 2;
+            document.getElementById('input-weight-lbs').value = roundTenth(p.weightKg * 2.20462);
+            document.getElementById('input-weight-kg').value = roundTenth(p.weightKg);
 
             ['cut', 'maintain', 'bulk', 'custom'].forEach(g => {
                 const btn = document.getElementById('goal-btn-' + g);
@@ -2802,7 +2802,7 @@
                     <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
                         <div class="flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden">
                             <span class="text-[10px] text-slate-400 px-2 font-medium">Servings</span>
-                            <input id="qty-${food.id}" type="number" min="0.25" max="20" step="0.25" value="1" class="w-14 py-1 px-1.5 text-xs font-bold text-center text-slate-800 outline-none border-l border-slate-200">
+                            <input id="qty-${food.id}" type="number" min="0.1" max="20" step="0.1" value="1" class="w-14 py-1 px-1.5 text-xs font-bold text-center text-slate-800 outline-none border-l border-slate-200">
                         </div>
                         <button onclick="addFoodFromFinder('${food.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1 shadow-2xs">
                             <i class="fa-solid fa-plus text-[10px]"></i> Add
@@ -2880,7 +2880,7 @@
                                     <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
                                         <div class="inline-flex items-center rounded-xl border border-slate-200 bg-white p-0.5">
                                             <button onclick="stepMealItemServings('${slot.key}', '${item.uid}', -0.25)" class="w-6 h-6 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-bold">−</button>
-                                            <input type="number" step="0.25" min="0.25" max="20" value="${item.servings}" onchange="updateMealItemServings('${slot.key}', '${item.uid}', this.value)" class="w-12 text-center text-xs font-bold text-slate-800 outline-none">
+                                            <input type="number" step="0.1" min="0.1" max="20" value="${item.servings}" onchange="updateMealItemServings('${slot.key}', '${item.uid}', this.value)" class="w-12 text-center text-xs font-bold text-slate-800 outline-none">
                                             <button onclick="stepMealItemServings('${slot.key}', '${item.uid}', 0.25)" class="w-6 h-6 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-bold">+</button>
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-medium hidden md:inline">srv</span>
@@ -2926,7 +2926,7 @@
             const list = state.meals[mealKey] || [];
             const item = list.find(i => i.uid === uid);
             if (!item) return;
-            const next = Math.max(0.25, Math.round((Number(item.servings) + delta) * 100) / 100);
+            const next = Math.max(0.1, Math.round((Number(item.servings) + delta) * 100) / 100);
             item.servings = next;
             saveState();
             recalculateAndRender();
@@ -2936,7 +2936,7 @@
             const list = state.meals[mealKey] || [];
             const item = list.find(i => i.uid === uid);
             if (!item) return;
-            item.servings = Math.max(0.1, Number(val) || 1);
+            item.servings = Math.max(0.1, Math.round((Number(val) || 1) * 10) / 10);
             saveState();
             recalculateAndRender();
         }
@@ -3257,15 +3257,19 @@
             document.getElementById('custom-food-modal').classList.add('hidden');
             document.getElementById('custom-food-form').reset();
             delete document.getElementById('cf-emoji').dataset.manual;
+            delete document.getElementById('cf-kcal').dataset.manual;
         }
 
-        function autoCalcCustomCalories() {
+        function autoCalcCustomCalories(force = false) {
+            const kcalInput = document.getElementById('cf-kcal');
+            if (kcalInput.dataset.manual === '1' && !force) return;
             const p = Number(document.getElementById('cf-p').value) || 0;
             const c = Number(document.getElementById('cf-c').value) || 0;
             const f = Number(document.getElementById('cf-f').value) || 0;
-            const kcal = Math.round((p * 4) + (c * 4) + (f * 9));
+            const kcal = Math.round(((p * 4) + (c * 4) + (f * 9)) * 10) / 10;
             if (kcal > 0) {
-                document.getElementById('cf-kcal').value = kcal;
+                kcalInput.value = kcal;
+                kcalInput.dataset.manual = '';
             }
         }
 
@@ -3748,8 +3752,8 @@ ${fieldSpec}` });
 
             document.getElementById('scan-res-name').value = data.foodName || 'Scanned Food Item';
             document.getElementById('scan-res-serving').value = data.servingDesc || '1 serving';
-            document.getElementById('scan-res-grams').value = Math.round(Number(data.grams) || 100);
-            document.getElementById('scan-res-cal').value = Math.round(Number(data.cal) || 0);
+            document.getElementById('scan-res-grams').value = Math.round((Number(data.grams) || 100) * 10) / 10;
+            document.getElementById('scan-res-cal').value = Math.round((Number(data.cal) || 0) * 10) / 10;
             document.getElementById('scan-res-p').value = Number(data.p || 0).toFixed(1).replace(/\.0$/, '');
             document.getElementById('scan-res-c').value = Number(data.c || 0).toFixed(1).replace(/\.0$/, '');
             document.getElementById('scan-res-f').value = Number(data.f || 0).toFixed(1).replace(/\.0$/, '');
