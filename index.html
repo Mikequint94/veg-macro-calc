@@ -1045,14 +1045,9 @@
                     <button id="sync-send-link-btn" type="submit" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-envelope"></i> Email Me a Sign-In Link
                     </button>
-                    <div id="sync-link-sent-msg" class="hidden space-y-2.5">
-                        <p class="text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
-                            Check your inbox. Enter the 6-digit code from the email here, or tap the link in the email.
-                        </p>
-                        <div class="flex gap-2">
-                            <input id="sync-code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456" class="flex-1 min-w-0 px-3.5 py-2 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-base font-bold tracking-[0.3em] text-center">
-                            <button id="sync-verify-btn" type="button" onclick="verifySyncCode()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition">Verify</button>
-                        </div>
+                    <p id="sync-link-sent-msg" class="hidden text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+                        Check your inbox and open the link in this browser to finish signing in.
+                    </p>
                     </div>
                 </form>
 
@@ -1960,30 +1955,6 @@
             return true;
         }
 
-        async function verifySignInCode(email, code, buttonEl) {
-            const token = String(code || '').replace(/\s+/g, '');
-            if (!email || token.length < 6) {
-                showToast('Enter the code from your email');
-                return false;
-            }
-            buttonEl.disabled = true;
-            const { error } = await supabaseClient.auth.verifyOtp({ email, token, type: 'email' });
-            buttonEl.disabled = false;
-            if (error) {
-                showToast(`That code didn't work: ${error.message}`);
-                return false;
-            }
-            return true;
-        }
-
-        async function verifySyncCode() {
-            const email = document.getElementById('sync-email-input').value.trim();
-            const ok = await verifySignInCode(email, document.getElementById('sync-code-input').value, document.getElementById('sync-verify-btn'));
-            if (!ok) return;
-            closeSyncModal();
-            showToast('Signed in. Your data will sync across devices.');
-        }
-
         async function sendSignInLink(e) {
             e.preventDefault();
             const email = document.getElementById('sync-email-input').value.trim();
@@ -2581,11 +2552,11 @@
         ];
         let onboardingStep = 0;
         let onboardingEmail = '';
-        let onboardingCodeSent = false;
+        let onboardingLinkSent = false;
 
         function startOnboarding() {
             onboardingStep = 0;
-            onboardingCodeSent = false;
+            onboardingLinkSent = false;
             document.getElementById('onboarding-modal').classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
             renderOnboarding();
@@ -2778,19 +2749,18 @@
             if (!supabaseClient) {
                 return heading('You’re all set', 'Your data is saved in this browser.') + primary('Start tracking', 'type="button" onclick="finishOnboarding()"');
             }
-            if (!onboardingCodeSent) {
+            if (!onboardingLinkSent) {
                 return heading('Save your progress', 'Use your email to back up your logs and use NutriPulse on your phone and laptop. No password needed.')
-                    + `<form onsubmit="onboardingSendCode(event)" class="space-y-3">
+                    + `<form onsubmit="onboardingSendLink(event)" class="space-y-3">
                         <input id="ob-email" type="email" required autocomplete="email" value="${escapeHtml(onboardingEmail)}" placeholder="you@example.com" class="ob-input">
-                        <button id="ob-send-btn" type="submit" class="w-full py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-base font-bold transition flex items-center justify-center gap-2"><i class="fa-solid fa-envelope"></i> Email me a sign-in code</button>
+                        <button id="ob-send-btn" type="submit" class="w-full py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-base font-bold transition flex items-center justify-center gap-2"><i class="fa-solid fa-envelope"></i> Email me a sign-in link</button>
                     </form>` + skip;
             }
-            return heading('Check your email', `We sent a code to <span class="font-semibold text-slate-800">${escapeHtml(onboardingEmail)}</span>. Enter it below, or tap the link in the email.`)
-                + `<form onsubmit="onboardingVerifyCode(event)" class="space-y-3">
-                    <input id="ob-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="123456" class="ob-input text-center text-2xl font-extrabold tracking-[0.4em]">
-                    <button id="ob-verify-btn" type="submit" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold transition">Verify & start tracking</button>
-                    <button type="button" onclick="onboardingCodeSent = false; renderOnboarding()" class="w-full text-sm font-semibold text-slate-500 hover:text-slate-800">Use a different email</button>
-                </form>` + skip;
+            return heading('Check your email', `We sent a sign-in link to <span class="font-semibold text-slate-800">${escapeHtml(onboardingEmail)}</span>. Open it in this browser to finish saving your account.`)
+                + `<div class="space-y-3">
+                    <button type="button" onclick="finishOnboarding()" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold transition">Start tracking</button>
+                    <button type="button" onclick="onboardingLinkSent = false; renderOnboarding()" class="w-full text-sm font-semibold text-slate-500 hover:text-slate-800">Use a different email</button>
+                </div>`;
         }
 
         function renderOnboarding() {
@@ -2810,7 +2780,7 @@
             document.getElementById('onboarding-modal').scrollTop = 0;
         }
 
-        async function onboardingSendCode(e) {
+        async function onboardingSendLink(e) {
             e.preventDefault();
             onboardingEmail = document.getElementById('ob-email').value.trim();
             const sent = await requestSignInLink(onboardingEmail, document.getElementById('ob-send-btn'));
@@ -2818,14 +2788,8 @@
             // The email link opens a fresh page load, which should not restart onboarding.
             state.onboarded = true;
             saveState();
-            onboardingCodeSent = true;
+            onboardingLinkSent = true;
             renderOnboarding();
-        }
-
-        async function onboardingVerifyCode(e) {
-            e.preventDefault();
-            const ok = await verifySignInCode(onboardingEmail, document.getElementById('ob-code').value, document.getElementById('ob-verify-btn'));
-            if (ok) finishOnboarding();
         }
 
         function finishOnboarding() {
