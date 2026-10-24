@@ -222,7 +222,7 @@
                 </div>
                 <div class="min-w-0">
                     <h1 class="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">NutriPulse</h1>
-                    <p class="text-xs text-slate-500 hidden sm:flex lg:hidden xl:flex items-center gap-1.5">
+                    <p class="text-xs text-slate-500 hidden sm:flex lg:hidden items-center gap-1.5">
                         Vegetarian calorie & macro tracker
                         <span id="storage-status-badge" class="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/80 transition-all" title="Your data is saved in this browser, and to your account when signed in">
                             <span id="storage-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -234,16 +234,16 @@
 
             <!-- Desktop Section Tabs -->
             <nav class="hidden lg:flex items-center bg-slate-100 rounded-xl p-1 gap-1 order-2" aria-label="Sections">
-                <button data-view-tab="today" onclick="setView('today')" class="view-tab px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-2"><i class="fa-solid fa-sun text-xs"></i> Today</button>
-                <button data-view-tab="progress" onclick="setView('progress')" class="view-tab px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-2"><i class="fa-solid fa-chart-line text-xs"></i> Progress</button>
-                <button data-view-tab="plan" onclick="setView('plan')" class="view-tab px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-2"><i class="fa-solid fa-bullseye text-xs"></i> My Plan</button>
+                <button data-view-tab="today" onclick="setView('today')" class="view-tab px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-sun text-xs"></i> Today</button>
+                <button data-view-tab="progress" onclick="setView('progress')" class="view-tab px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-chart-line text-xs"></i> Progress</button>
+                <button data-view-tab="plan" onclick="setView('plan')" class="view-tab px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-bullseye text-xs"></i> My Plan</button>
             </nav>
 
             <!-- Date Selector Bar (Multi-Day localStorage Navigation) -->
             <div class="flex items-center bg-slate-100/90 border border-slate-200/80 rounded-xl p-1 gap-1 order-3 w-full lg:w-auto justify-between lg:justify-center">
                 <button onclick="changeDateByOffset(-1)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-2xs transition flex items-center gap-1" title="Previous Day">
                     <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                    <span class="hidden sm:inline">Prev</span>
+                    <span class="hidden sm:inline lg:hidden xl:inline">Prev</span>
                 </button>
                 <div class="flex items-center gap-1.5 px-2">
                     <i class="fa-regular fa-calendar text-emerald-600 text-xs"></i>
@@ -251,7 +251,7 @@
                     <span id="date-relative-badge" class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">Today</span>
                 </div>
                 <button onclick="changeDateByOffset(1)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-2xs transition flex items-center gap-1" title="Next Day">
-                    <span class="hidden sm:inline">Next</span>
+                    <span class="hidden sm:inline lg:hidden xl:inline">Next</span>
                     <i class="fa-solid fa-chevron-right text-[10px]"></i>
                 </button>
                 <button id="jump-today-btn" onclick="jumpToToday()" class="hidden px-2 py-1 rounded-lg text-[11px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition">
@@ -265,11 +265,11 @@
                 <!-- Cloud Sync Account Button -->
                 <button id="cloud-sync-btn" onclick="openSyncModal()" class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200 transition" title="Sign in to sync your data across devices">
                     <i id="cloud-sync-icon" class="fa-solid fa-cloud-arrow-up"></i>
-                    <span id="cloud-sync-label" class="hidden sm:inline">Sign in to sync</span>
+                    <span id="cloud-sync-label" class="hidden sm:inline lg:hidden xl:inline whitespace-nowrap">Sign in to sync</span>
                 </button>
 
 
-                <button onclick="openAddSheet()" class="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20 transition">
+                <button onclick="openAddSheet()" class="hidden lg:inline-flex whitespace-nowrap items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20 transition">
                     <i class="fa-solid fa-plus"></i> Add food
                 </button>
 
