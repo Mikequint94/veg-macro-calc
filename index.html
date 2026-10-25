@@ -280,7 +280,6 @@
                         <i class="fa-solid fa-ellipsis"></i>
                     </button>
                     <div id="more-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 p-1.5 z-50 animate-fade-in">
-                        <button onclick="closeMoreMenu(); openTemplatesModal()" class="menu-item"><i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i> Sample day plans</button>
                         <button onclick="closeMoreMenu(); copyDailySummaryClipboard()" class="menu-item"><i class="fa-regular fa-copy text-slate-500"></i> Copy day summary</button>
                         <button onclick="closeMoreMenu(); exportDailyLogCSV()" class="menu-item"><i class="fa-solid fa-file-csv text-slate-500"></i> Export day as CSV</button>
                         <button onclick="cycleTheme()" class="menu-item"><i id="theme-menu-icon" class="fa-solid fa-circle-half-stroke text-indigo-500"></i> <span id="theme-menu-label">Theme: Auto</span></button>
@@ -452,6 +451,9 @@
                     <div id="finisher-suggestions" class="space-y-2">
                         <!-- Dynamically populated suggestions -->
                     </div>
+                    <button id="finisher-more-btn" onclick="showMoreFinisherSuggestions()" class="hidden mt-3 w-full py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-emerald-200 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-rotate text-[10px]"></i> Show more
+                    </button>
                 </div>
 
             </section>
@@ -805,13 +807,31 @@
             <div class="px-5 py-4 flex items-center justify-between border-b border-slate-100">
                 <div>
                     <h3 class="font-extrabold text-base text-slate-900">Sample day plans</h3>
-                    <p class="text-xs text-slate-500">Replaces this day's log and sets a matching calorie target.</p>
+                    <p class="text-xs text-slate-500">Fills this day with a sample menu and sets a matching calorie target.</p>
                 </div>
                 <button onclick="closeTemplatesModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500 flex items-center justify-center" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-2 overflow-y-auto" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));">
-                <div class="py-1 space-y-1">
-                            <button onclick="loadMealTemplate('cut_veg')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                <div id="template-confirm" class="hidden p-3 space-y-3">
+                    <div class="flex items-center gap-2.5">
+                        <span id="template-confirm-icon" class="text-2xl"></span>
+                        <div id="template-confirm-name" class="text-sm font-bold text-slate-900"></div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1.5">
+                        <div class="font-bold">Are you sure? Loading this plan will:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Fill breakfast, lunch, dinner, snacks, and water for <span id="template-confirm-date"></span> with the sample menu.</li>
+                            <li>Change your daily calorie target from <strong id="template-confirm-from"></strong> to <strong id="template-confirm-to"></strong> and switch your macro split to match the plan.</li>
+                        </ul>
+                        <div class="text-amber-800/80">Other days are not affected. You can set your own target again anytime under My Plan.</div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <button onclick="cancelLoadMealTemplate()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Back</button>
+                        <button id="template-confirm-btn" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">Yes, load plan</button>
+                    </div>
+                </div>
+                <div id="template-list" class="py-1 space-y-1">
+                            <button onclick="askLoadMealTemplate('cut_veg', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">🔥</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">High-Protein Cut (Vegetarian)</div>
@@ -819,7 +839,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('athletic_maintain')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('athletic_maintain', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">⚖️</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">Balanced Athletic Maintenance</div>
@@ -827,7 +847,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('muscle_bulk')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('muscle_bulk', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">💪</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">High-Calorie Muscle Bulk</div>
@@ -835,7 +855,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('vegan_fuel')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('vegan_fuel', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">🌱</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">Plant-Based Vegan Fuel (Zero Dairy)</div>
@@ -843,7 +863,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('keto_veg')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('keto_veg', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">🥑</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">Low-Carb Vegetarian / Keto-Friendly</div>
@@ -851,7 +871,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('high_fiber_prep')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('high_fiber_prep', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">🌾</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">High-Fiber Meal Prep Day</div>
@@ -859,7 +879,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('quick_easy')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('quick_easy', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">⚡</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">Quick & Easy Busy Day (Minimal Cook)</div>
@@ -867,7 +887,7 @@
                                 </div>
                             </button>
 
-                            <button onclick="loadMealTemplate('endurance_runner')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
+                            <button onclick="askLoadMealTemplate('endurance_runner', this)" class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50/60 transition flex items-start gap-2.5">
                                 <span class="text-base mt-0.5">🏃</span>
                                 <div>
                                     <div class="text-xs font-bold text-slate-900">Endurance Runner / Carbo-Load</div>
@@ -2067,11 +2087,30 @@
 
         function openTemplatesModal() {
             closeMoreMenu();
+            cancelLoadMealTemplate();
             document.getElementById('templates-modal').classList.remove('hidden');
         }
 
         function closeTemplatesModal() {
             document.getElementById('templates-modal').classList.add('hidden');
+        }
+
+        function askLoadMealTemplate(templateKey, buttonEl) {
+            const name = buttonEl.querySelector('.font-bold')?.textContent.trim() || 'this plan';
+            const kcalMatch = buttonEl.textContent.match(/~([\d,]+)\s*kcal/);
+            document.getElementById('template-confirm-icon').textContent = buttonEl.querySelector('span')?.textContent || '';
+            document.getElementById('template-confirm-name').textContent = name;
+            document.getElementById('template-confirm-date').textContent = formatFriendlyDateLabel(state.activeDate);
+            document.getElementById('template-confirm-from').textContent = `${Math.round(state.targets?.calories || 0).toLocaleString()} kcal`;
+            document.getElementById('template-confirm-to').textContent = kcalMatch ? `${kcalMatch[1]} kcal` : "the plan's target";
+            document.getElementById('template-confirm-btn').onclick = () => loadMealTemplate(templateKey);
+            document.getElementById('template-list').classList.add('hidden');
+            document.getElementById('template-confirm').classList.remove('hidden');
+        }
+
+        function cancelLoadMealTemplate() {
+            document.getElementById('template-confirm').classList.add('hidden');
+            document.getElementById('template-list').classList.remove('hidden');
         }
 
         function toggleMoreMenu(event) {
@@ -3441,12 +3480,32 @@
         /**************************************************************
          * 6. SMART MACRO FINISHER (VEGETARIAN RECOMBINATOR)
          **************************************************************/
+        const FINISHER_PAGE_SIZE = 3;
+        const FINISHER_MAX_RANKED = 15;
+        let finisherPage = 0;
+        let finisherGapKey = '';
+        let finisherLastArgs = null;
+
+        function showMoreFinisherSuggestions() {
+            finisherPage++;
+            if (finisherLastArgs) renderSmartFinisher(...finisherLastArgs);
+        }
+
         function renderSmartFinisher(consumed, targets) {
+            finisherLastArgs = [consumed, targets];
             const container = document.getElementById('finisher-suggestions');
+            const moreBtn = document.getElementById('finisher-more-btn');
             const remCal = targets.calories - consumed.cal;
             const remP = Math.max(0, targets.p - consumed.p);
             const remC = Math.max(0, targets.c - consumed.c);
             const remF = Math.max(0, targets.f - consumed.f);
+
+            const gapKey = [remCal, remP, remC, remF].map(n => Math.round(n)).join('|');
+            if (gapKey !== finisherGapKey) {
+                finisherGapKey = gapKey;
+                finisherPage = 0;
+            }
+            moreBtn.classList.add('hidden');
 
             if (remCal <= 60 && remP <= 8) {
                 container.innerHTML = `
@@ -3488,9 +3547,19 @@
                     return { food, score, reason };
                 })
                 .sort((a, b) => b.score - a.score)
-                .slice(0, 3);
+                .slice(0, FINISHER_MAX_RANKED);
 
-            container.innerHTML = scored.map(({ food, reason }) => `
+            const pageCount = Math.max(1, Math.ceil(scored.length / FINISHER_PAGE_SIZE));
+            const page = finisherPage % pageCount;
+            const visible = scored.slice(page * FINISHER_PAGE_SIZE, (page + 1) * FINISHER_PAGE_SIZE);
+            if (pageCount > 1) {
+                moreBtn.classList.remove('hidden');
+                moreBtn.innerHTML = page === pageCount - 1
+                    ? '<i class="fa-solid fa-rotate-left text-[10px]"></i> Back to top picks'
+                    : '<i class="fa-solid fa-rotate text-[10px]"></i> Show more';
+            }
+
+            container.innerHTML = visible.map(({ food, reason }) => `
                 <div class="p-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
                         <span class="text-lg shrink-0">${food.icon || '🌱'}</span>
@@ -4206,6 +4275,8 @@
             const targetMeal = selectEl ? selectEl.value : 'breakfast';
             const scanMealSelect = document.getElementById('scan-res-meal');
             if (scanMealSelect) scanMealSelect.value = targetMeal;
+            document.getElementById('describe-meal-text').value = '';
+            document.getElementById('scan-hint-name').value = '';
 
             document.getElementById('scan-label-modal').classList.remove('hidden');
             updateAiAccessNote();
@@ -4414,7 +4485,6 @@
                     showToast(`${remaining} AI scan${remaining === 1 ? '' : 's'} left today`);
                 }
                 populateReviewForm(parsed);
-                document.getElementById('scan-res-save-catalog').checked = !isDescribe;
 
             } catch (err) {
                 console.error('Vision extraction error:', err);
@@ -4448,6 +4518,8 @@
             document.getElementById('scan-res-c').value = Number(data.c || 0).toFixed(1).replace(/\.0$/, '');
             document.getElementById('scan-res-f').value = Number(data.f || 0).toFixed(1).replace(/\.0$/, '');
             document.getElementById('scan-res-fiber').value = Number(data.fiber || 0).toFixed(1).replace(/\.0$/, '');
+            document.getElementById('scan-res-servings-to-log').value = 1;
+            document.getElementById('scan-res-save-catalog').checked = true;
 
             if (data.suggestedCategory) {
                 document.getElementById('scan-res-category').value = data.suggestedCategory;
