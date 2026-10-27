@@ -1,0 +1,2584 @@
+{
+  "units": [
+    "iron mg",
+    "calcium mg",
+    "zinc mg",
+    "vitamin B12 µg",
+    "omega-3 g (ALA+EPA+DHA)"
+  ],
+  "perServing": true,
+  "checked": "2026-10-26",
+  "foods": [
+    {
+      "id": "v1",
+      "name": "Seitan (Vital Wheat Gluten, Cooked)",
+      "values": [
+        2.5,
+        70,
+        0.4,
+        0,
+        0
+      ],
+      "source": "Upton's Naturals Traditional Seitan label (57g: 1.4mg Fe, 40mg Ca) scaled to 100g; zinc estimated from USDA SR 168147 Vital wheat gluten (0.85mg/100g dry) x ~45% gluten content",
+      "confidence": "medium",
+      "note": "No USDA entry for cooked seitan; brand-dependent. Zinc is an estimate, not on label."
+    },
+    {
+      "id": "v2",
+      "name": "Extra Firm Organic Tofu (Pressed)",
+      "values": [
+        2.5,
+        229,
+        1.5,
+        0,
+        0.6
+      ],
+      "source": "Nasoya Organic Extra Firm label (85g: Fe 8% DV/1.44mg, Ca 10% DV ~130mg) scaled to 150g; zinc/ALA from USDA SR 172475/172448 firm tofu range",
+      "confidence": "medium",
+      "note": "Coagulant is calcium sulfate + nigari; calcium-set-only brands can be ~2x higher, nigari-only much lower. Zinc not on label."
+    },
+    {
+      "id": "v3",
+      "name": "Super Firm High-Protein Tofu",
+      "values": [
+        3.8,
+        125,
+        2.4,
+        0,
+        0.9
+      ],
+      "source": "Avg of Trader Joe's High Protein Super Firm label (84g: Fe 2.7mg, Ca 40-60mg) and Wildwood High Protein Super Firm (91g: Fe 1.7mg, Ca 90mg) scaled to 150g",
+      "confidence": "low",
+      "note": "Brand-dependent; super-firm high-protein tofu is mostly nigari-set so calcium is far lower than 300. Zinc and omega-3 estimated from protein/fat density (7g fat per 84g, ~7.5% ALA)."
+    },
+    {
+      "id": "v4",
+      "name": "Organic Tempeh (Steamed / Sautéed)",
+      "values": [
+        2.1,
+        96,
+        1.6,
+        0.1,
+        0.1
+      ],
+      "source": "USDA SR Legacy 172467 Tempeh, cooked (via nutritionvalue.org)",
+      "confidence": "high",
+      "note": "Old values matched raw tempeh."
+    },
+    {
+      "id": "v5",
+      "name": "Textured Vegetable Protein (TVP, Dry)",
+      "values": [
+        4.2,
+        119,
+        1.2,
+        0,
+        0
+      ],
+      "source": "Bob's Red Mill TVP label (23g: Fe 2mg, Ca 57mg) scaled to 48g; zinc from USDA SR defatted soy flour (2.46mg/100g)",
+      "confidence": "medium"
+    },
+    {
+      "id": "v6",
+      "name": "Shelled Edamame (Steamed)",
+      "values": [
+        3.5,
+        98,
+        2.1,
+        0,
+        0.6
+      ],
+      "source": "USDA SR Legacy 168411 Edamame, frozen, prepared (155g: ALA 0.555g + EPA 0.005g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v7",
+      "name": "Lupini Beans (Rinsed, Cooked)",
+      "values": [
+        2,
+        85,
+        2.3,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 172424 Lupins, mature seeds, cooked, boiled (ALA 0.134g/100g)",
+      "confidence": "medium",
+      "note": "Jarred brined lupini labels often show lower iron; SR cooked used."
+    },
+    {
+      "id": "v8",
+      "name": "Pea & Brown Rice Protein Powder",
+      "values": [
+        4.5,
+        45,
+        1,
+        0,
+        0
+      ],
+      "source": "Brand labels: Orgain Organic Protein (46g: 6.5mg Fe, 60mg Ca) and Vega Protein Made Simple (1 scoop: 4mg Fe, 20mg Ca), scaled to 32g",
+      "confidence": "low",
+      "note": "Highly brand-dependent; zinc rarely labeled, estimated."
+    },
+    {
+      "id": "v9",
+      "name": "Soy Protein Isolate Powder",
+      "values": [
+        4.4,
+        53,
+        1.2,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 174276 Soy protein isolate (Fe 14.5, Ca 178, Zn 4.03, ALA 0.195 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v10",
+      "name": "Nutritional Yeast (Nooch)",
+      "values": [
+        1.3,
+        8,
+        3,
+        20,
+        0
+      ],
+      "source": "Labels: Bob's Red Mill Large Flake (15g: Fe 1mg, B12 17.6mcg), Bragg (10g: Fe 1mg, B12 15mcg); zinc from Red Star spec (~197mcg/g)",
+      "confidence": "low",
+      "note": "Fortified; B12 varies widely by brand (~19-24mcg per 16g for Bob's/Bragg). Unfortified nooch has ~0 B12."
+    },
+    {
+      "id": "v11",
+      "name": "Whole Large Pasture-Raised Egg",
+      "values": [
+        0.9,
+        28,
+        0.6,
+        0.45,
+        0.1
+      ],
+      "source": "USDA SR Legacy 171287 Egg, whole, raw, fresh (ALA 0.048 + DHA 0.058 g/100g)",
+      "confidence": "high",
+      "note": "Pasture-raised/omega-3 eggs can have more omega-3."
+    },
+    {
+      "id": "v12",
+      "name": "Liquid Egg Whites",
+      "values": [
+        0.1,
+        8,
+        0,
+        0.1,
+        0
+      ],
+      "source": "USDA SR Legacy 172183 Egg, white, raw, fresh",
+      "confidence": "high"
+    },
+    {
+      "id": "v13",
+      "name": "Greek Yogurt (0% Non-Fat Plain)",
+      "values": [
+        0.1,
+        187,
+        0.9,
+        1.3,
+        0
+      ],
+      "source": "USDA SR Legacy 170894 Yogurt, Greek, plain, nonfat (170g, via nutritionvalue.org)",
+      "confidence": "high"
+    },
+    {
+      "id": "v14",
+      "name": "Cottage Cheese (Low-Fat 2%)",
+      "values": [
+        0.1,
+        117,
+        0.7,
+        0.5,
+        0
+      ],
+      "source": "USDA Foundation 328841 Cheese, cottage, lowfat, 2% milkfat (220g: Fe 0.29, Ca 227, Zn 1.34, B12 0.92) scaled to 113g",
+      "confidence": "high"
+    },
+    {
+      "id": "v15",
+      "name": "Indian Paneer Cheese",
+      "values": [
+        0.2,
+        480,
+        2.7,
+        0.6,
+        0.1
+      ],
+      "source": "IFCT 2017 (India) Paneer: Ca 476, Zn 2.7 per 100g; US labels (Karoun, SWAD) list 200mg Ca/28g and 0mg Fe",
+      "confidence": "low",
+      "note": "No USDA entry. B12 and omega-3 estimated from similar fresh cheeses; iron set to dairy-typical level (IFCT lists 0.9)."
+    },
+    {
+      "id": "v16",
+      "name": "Low-Fat Mozzarella (Shredded)",
+      "values": [
+        0.1,
+        201,
+        1,
+        0.4,
+        0
+      ],
+      "source": "USDA SR Legacy Cheese, mozzarella, low moisture, part-skim, shredded (86g: Ca 616, Zn 3.10, B12 1.14) scaled to 28g",
+      "confidence": "high"
+    },
+    {
+      "id": "v17",
+      "name": "Sharp Cheddar Cheese",
+      "values": [
+        0,
+        199,
+        1,
+        0.3,
+        0
+      ],
+      "source": "USDA SR Legacy 173414 Cheese, cheddar (Fe 0.14, Ca 710, Zn 3.64, B12 1.1, n-3 0.125 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v18",
+      "name": "Greek Feta Cheese (Crumbled)",
+      "values": [
+        0.2,
+        138,
+        0.8,
+        0.5,
+        0.1
+      ],
+      "source": "USDA SR Legacy 173420 Cheese, feta",
+      "confidence": "high"
+    },
+    {
+      "id": "v19",
+      "name": "Part-Skim Ricotta Cheese",
+      "values": [
+        0.6,
+        337,
+        1.7,
+        0.4,
+        0.1
+      ],
+      "source": "USDA SR Legacy Cheese, ricotta, part skim milk (124g, via nutritionvalue.org)",
+      "confidence": "high"
+    },
+    {
+      "id": "v20",
+      "name": "Fairlife Ultra-Filtered Skim Milk",
+      "values": [
+        0,
+        380,
+        1.6,
+        1.1,
+        0
+      ],
+      "source": "fairlife Fat Free Ultra-Filtered Milk label (fairlife.com, 2026)",
+      "confidence": "high"
+    },
+    {
+      "id": "v21",
+      "name": "Whey Protein Isolate",
+      "values": [
+        0.1,
+        120,
+        0.5,
+        0.3,
+        0
+      ],
+      "source": "Dymatize ISO100 label (120mg Ca, 0mg Fe non-chocolate flavors); Isopure unflavored lists only 30mg Ca",
+      "confidence": "low",
+      "note": "Brand/flavor-dependent (chocolate flavors ~0.8-1.9mg iron). Zinc and B12 not on labels; kept estimates. USDA SR 'whey protein powder isolate' is a fortified product (Zn 8.7, B12 3.5/100g) and was not used."
+    },
+    {
+      "id": "v22",
+      "name": "Black Beans (Cooked)",
+      "values": [
+        1.8,
+        23,
+        1,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 173735 Beans, black, mature seeds, cooked, boiled",
+      "confidence": "high"
+    },
+    {
+      "id": "v23",
+      "name": "Chickpeas (Garbanzo, Cooked)",
+      "values": [
+        2.4,
+        40,
+        1.3,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 173757 Chickpeas, mature seeds, cooked, boiled",
+      "confidence": "high"
+    },
+    {
+      "id": "v24",
+      "name": "Green Lentils (Cooked)",
+      "values": [
+        6.6,
+        38,
+        2.5,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 172421 Lentils, mature seeds, cooked, boiled",
+      "confidence": "high"
+    },
+    {
+      "id": "v25",
+      "name": "Red Split Lentils (Cooked)",
+      "values": [
+        6.6,
+        38,
+        2.5,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 172421 Lentils, mature seeds, cooked, boiled (no separate red lentil entry)",
+      "confidence": "medium",
+      "note": "USDA has no cooked red split lentil entry; generic lentils used."
+    },
+    {
+      "id": "v26",
+      "name": "Pinto Beans (Cooked)",
+      "values": [
+        1.8,
+        40,
+        0.8,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 175200 Beans, pinto, mature seeds, cooked, boiled",
+      "confidence": "high"
+    },
+    {
+      "id": "v27",
+      "name": "Kidney Beans (Dark Red, Cooked)",
+      "values": [
+        2.6,
+        25,
+        0.9,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 175194 Beans, kidney, red, mature seeds, cooked, boiled",
+      "confidence": "high"
+    },
+    {
+      "id": "v28",
+      "name": "Traditional Hummus",
+      "values": [
+        0.8,
+        14,
+        0.4,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy Hummus, commercial (15g: Fe 0.38, Ca 7, Zn 0.22, ALA 0.109) scaled to 30g",
+      "confidence": "high"
+    },
+    {
+      "id": "v29",
+      "name": "Split Green Peas (Cooked)",
+      "values": [
+        2.5,
+        27,
+        2,
+        0,
+        0.3
+      ],
+      "source": "USDA SR Legacy 172429 Peas, split, mature seeds, cooked, boiled (ALA 0.137g/100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v30",
+      "name": "Rolled Oats (Dry)",
+      "values": [
+        1.7,
+        21,
+        1.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 173904 Cereals, oats, regular and quick, not fortified, dry",
+      "confidence": "high"
+    },
+    {
+      "id": "v31",
+      "name": "Steel Cut Oats (Dry)",
+      "values": [
+        1.7,
+        21,
+        1.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 173904 Cereals, oats, not fortified, dry (steel cut is same grain)",
+      "confidence": "high"
+    },
+    {
+      "id": "v32",
+      "name": "Quinoa (Cooked)",
+      "values": [
+        2.8,
+        31,
+        2,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 168917 Quinoa, cooked",
+      "confidence": "high"
+    },
+    {
+      "id": "v33",
+      "name": "Jasmine White Rice (Cooked)",
+      "values": [
+        0.3,
+        16,
+        0.8,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 169757 Rice, white, long-grain, regular, unenriched, cooked",
+      "confidence": "medium",
+      "note": "Imported Thai jasmine is usually unenriched; US-enriched jasmine would be ~1.9mg iron per cup (SR 168878)."
+    },
+    {
+      "id": "v34",
+      "name": "Brown Rice (Cooked)",
+      "values": [
+        1.1,
+        6,
+        1.4,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 169704 Rice, brown, long-grain, cooked (Fe 0.56, Ca 3, Zn 0.71 per 100g)",
+      "confidence": "high",
+      "note": "Medium-grain brown rice has more calcium (~20mg/cup)."
+    },
+    {
+      "id": "v35",
+      "name": "Farro (Cooked Whole Grain)",
+      "values": [
+        1.2,
+        10,
+        1.5,
+        0,
+        0
+      ],
+      "source": "USDA FDC 2710828 Farro, dry (Fe 3.2, Ca 26, Zn 3.97 per 100g) converted at ~0.37g dry per g cooked",
+      "confidence": "medium",
+      "note": "No USDA cooked farro entry; dry-to-cooked conversion estimated."
+    },
+    {
+      "id": "v36",
+      "name": "Whole Wheat Pasta (Cooked)",
+      "values": [
+        2.4,
+        18,
+        1.9,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 168910 Pasta, whole-wheat, cooked (Fe 1.72, Ca 13, Zn 1.34, ALA 0.036 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v37",
+      "name": "Sweet Potato (Baked, Flesh & Skin)",
+      "values": [
+        1,
+        57,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 168483 Sweet potato, cooked, baked in skin, flesh, without salt",
+      "confidence": "high"
+    },
+    {
+      "id": "v38",
+      "name": "Russet Potato (Baked)",
+      "values": [
+        1.9,
+        31,
+        0.6,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 170030 Potatoes, Russet, flesh and skin, baked",
+      "confidence": "high"
+    },
+    {
+      "id": "v39",
+      "name": "Artisan Sourdough Bread",
+      "values": [
+        2,
+        26,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 172675 Bread, french or vienna (includes sourdough)",
+      "confidence": "medium",
+      "note": "SR entry uses enriched flour; artisan sourdough from unenriched flour would have ~half the iron."
+    },
+    {
+      "id": "v40",
+      "name": "Ezekiel Sprouted Grain Bread",
+      "values": [
+        0.7,
+        10,
+        0.6,
+        0,
+        0
+      ],
+      "source": "Food For Life Ezekiel 4:9 label data via Carbmanager/Recipal (34g slice: Fe 0.7, Zn 0.6); label calcium shows 0-9 mg",
+      "confidence": "medium",
+      "note": "Could not read the official label directly. Label calcium is listed as 0-9 mg depending on the source, so 10 mg is a natural-grain estimate. The flax variety has about 2x the iron and zinc."
+    },
+    {
+      "id": "v41",
+      "name": "Whole Wheat Tortilla Wrap",
+      "values": [
+        1.6,
+        152,
+        1.2,
+        0,
+        0
+      ],
+      "source": "USDA FNDDS 52215260 Tortilla, whole wheat (per 100g: Fe 2.64, Ca 245, Zn 1.91, ALA 0.03)",
+      "confidence": "medium",
+      "note": "Calcium depends on brand and leavening: Mission WW is about 100 mg/45g, Whole Foods WW about 40 mg/50g."
+    },
+    {
+      "id": "v42",
+      "name": "Corn Tortilla",
+      "values": [
+        0.6,
+        41,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 18363 Tortillas, ready-to-bake or -fry, corn (Fe 1.2, Ca 81, Zn 0.9 per 100g; from memory, not refetched)",
+      "confidence": "medium"
+    },
+    {
+      "id": "v43",
+      "name": "Sweet Yellow Corn (Cooked)",
+      "values": [
+        0.4,
+        2,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 11168 Corn, sweet, yellow, cooked, boiled, without salt (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v44",
+      "name": "Baby Spinach (Raw)",
+      "values": [
+        1.6,
+        59,
+        0.3,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 11457 Spinach, raw (via nutritionvalue.org: Fe 2.71, Ca 99, Zn 0.53, ALA 0.138 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v45",
+      "name": "Tuscan Kale (Chopped)",
+      "values": [
+        0.6,
+        102,
+        0.2,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 11233 Kale, raw (via nutritionvalue.org: Fe 1.6, Ca 254, Zn 0.39, ALA 0.376 per 100g)",
+      "confidence": "high",
+      "note": "USDA has no separate entry for Tuscan/lacinato kale, so generic raw kale was used."
+    },
+    {
+      "id": "v46",
+      "name": "Broccoli Florets (Steamed)",
+      "values": [
+        1,
+        62,
+        0.7,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 11091 Broccoli, cooked, boiled, drained, without salt (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v47",
+      "name": "Mixed Bell Peppers (Sliced)",
+      "values": [
+        0.6,
+        14,
+        0.3,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy average of Peppers, sweet, red/yellow/green, raw (from memory)",
+      "confidence": "medium"
+    },
+    {
+      "id": "v48",
+      "name": "Zucchini Squash (Sliced, Cooked)",
+      "values": [
+        0.7,
+        32,
+        0.6,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 11478 Squash, summer, zucchini, incl. skin, cooked, boiled, drained, w/o salt (via nutritionvalue.org, 180g: Fe 0.67, Ca 32, Zn 0.59, ALA 0.169)",
+      "confidence": "high"
+    },
+    {
+      "id": "v49",
+      "name": "English Cucumber (Sliced)",
+      "values": [
+        0.3,
+        17,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 11205 Cucumber, with peel, raw (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v50",
+      "name": "Cremini / White Mushrooms (Sautéed)",
+      "values": [
+        0.4,
+        6,
+        0.9,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy Mushrooms, white, stir-fried (via nutritionvalue.org: Fe 0.25, Ca 4, Zn 0.57, B12 0, ALA 0 per 100g)",
+      "confidence": "medium",
+      "note": "Cremini mushrooms run higher. Raw cremini per 100g is Fe 0.4, Ca 18, Zn 1.1, B12 0.1, so a cooked cup could reach about Fe 0.9, Ca 40, Zn 2.5, B12 0.2."
+    },
+    {
+      "id": "v51",
+      "name": "Asparagus Spears (Roasted)",
+      "values": [
+        1.2,
+        31,
+        0.8,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 11012 Asparagus, cooked, boiled, drained (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v52",
+      "name": "Roma / Cherry Tomatoes",
+      "values": [
+        0.4,
+        15,
+        0.3,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 11529 Tomatoes, red, ripe, raw (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v53",
+      "name": "Hass Avocado",
+      "values": [
+        0.5,
+        10,
+        0.5,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 09038 Avocados, raw, California (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v54",
+      "name": "Medium Banana",
+      "values": [
+        0.3,
+        6,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 09040 Bananas, raw (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v55",
+      "name": "Blueberries (Fresh)",
+      "values": [
+        0.4,
+        9,
+        0.2,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 09050 Blueberries, raw (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v56",
+      "name": "Strawberries (Fresh Sliced)",
+      "values": [
+        0.6,
+        24,
+        0.2,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 09316 Strawberries, raw (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v57",
+      "name": "Honeycrisp Apple",
+      "values": [
+        0.2,
+        11,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 09003 Apples, raw, with skin (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v58",
+      "name": "Fresh Basil & Garlic Cloves",
+      "values": [
+        0.4,
+        27,
+        0.1,
+        0,
+        0
+      ],
+      "source": "Built from USDA SR Legacy 02044 Basil, fresh (10g) + 11215 Garlic, raw (5g) (from memory)",
+      "confidence": "medium",
+      "note": "The basil-to-garlic ratio was assumed."
+    },
+    {
+      "id": "v59",
+      "name": "Yellow / Red Onions (Diced)",
+      "values": [
+        0.2,
+        18,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 11282 Onions, raw (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v60",
+      "name": "Organic Chia Seeds",
+      "values": [
+        0.9,
+        76,
+        0.5,
+        0,
+        2.1
+      ],
+      "source": "USDA SR Legacy 12006 (FDC 170554) Seeds, chia seeds, dried (per 100g: Fe 7.72, Ca 631, Zn 4.58, ALA 17.8)",
+      "confidence": "high"
+    },
+    {
+      "id": "v61",
+      "name": "Hemp Hearts (Shelled Seeds)",
+      "values": [
+        1.6,
+        14,
+        2,
+        0,
+        1.7
+      ],
+      "source": "USDA SR Legacy 12012 Seeds, hemp seed, hulled (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v62",
+      "name": "Ground Flaxseed (Meal)",
+      "values": [
+        0.4,
+        18,
+        0.3,
+        0,
+        1.6
+      ],
+      "source": "USDA SR Legacy 12220 Seeds, flaxseed (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v63",
+      "name": "Raw Almonds",
+      "values": [
+        1,
+        75,
+        0.9,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 12061 Nuts, almonds (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v64",
+      "name": "Walnut Halves",
+      "values": [
+        0.8,
+        27,
+        0.9,
+        0,
+        2.5
+      ],
+      "source": "USDA SR Legacy 12155 Nuts, walnuts, english (ALA 9.08 g/100g; from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v65",
+      "name": "Pumpkin Seeds (Pepitas)",
+      "values": [
+        1.4,
+        7,
+        1.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 12014 Seeds, pumpkin and squash seed kernels, dried (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v66",
+      "name": "Natural Peanut Butter",
+      "values": [
+        0.3,
+        8,
+        0.4,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 16398 Peanut butter, smooth style, without salt (from memory)",
+      "confidence": "medium"
+    },
+    {
+      "id": "v67",
+      "name": "Creamy Almond Butter",
+      "values": [
+        0.6,
+        56,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 12195 Nuts, almond butter, plain, without salt added (from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v68",
+      "name": "Extra Virgin Olive Oil",
+      "values": [
+        0.1,
+        0,
+        0,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 04053 Oil, olive, salad or cooking (ALA 0.76 g/100g; from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v69",
+      "name": "Avocado Oil",
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 04581 Oil, avocado (ALA 0.96 g/100g; from memory)",
+      "confidence": "high"
+    },
+    {
+      "id": "v70",
+      "name": "Dark Chocolate (85% Cacao)",
+      "values": [
+        2.4,
+        15,
+        0.7,
+        0.1,
+        0
+      ],
+      "source": "USDA SR Legacy 19904 Chocolate, dark, 70-85% cacao solids (via nutritionvalue.org: per 100g Fe 11.9, Ca 73, Zn 3.31, B12 0.28, ALA 0.035)",
+      "confidence": "high",
+      "note": "USDA lists 0.28 ug/100g B12, which is about 0.06 ug per serving and rounds to 0.1. This likely depends on the brand (milk ingredients)."
+    },
+    {
+      "id": "v71",
+      "name": "Cowboy Caviar (Black Beans, Corn, Peppers, Lime)",
+      "values": [
+        2.3,
+        40,
+        1.3,
+        0,
+        0.1
+      ],
+      "source": "Built from ingredients using USDA SR Legacy: black beans cooked 80g, sweet corn 40g, bell pepper 40g, tomato 30g, onion 15g, cilantro/lime 15g, olive oil 7g",
+      "confidence": "low",
+      "note": "Recipe-dependent."
+    },
+    {
+      "id": "v72",
+      "name": "Herb Tofu Scramble (Nutritional Yeast & Spinach)",
+      "values": [
+        4.5,
+        350,
+        2.5,
+        2.4,
+        0.8
+      ],
+      "source": "Built from ingredients: firm tofu 170g (USDA SR mid-range between calcium-sulfate 16127 and nigari entries), raw spinach 30g, fortified nutritional yeast ~1 tbsp",
+      "confidence": "low",
+      "note": "Calcium depends heavily on the tofu coagulant. With SR calcium-sulfate tofu (683 mg/100g) it would be about 1150 mg; with nigari tofu, about 370 mg. B12 depends on the yeast brand and amount. Omega-3 was raised because firm tofu has about 0.4-0.58 g ALA/100g."
+    },
+    {
+      "id": "v73",
+      "name": "Hearty Red Lentil & Coconut Dahl Curry",
+      "values": [
+        5.5,
+        60,
+        2.3,
+        0,
+        0.1
+      ],
+      "source": "Built from ingredients: red lentils ~50g dry (USDA SR Lentils, pink or red, raw), canned coconut milk 50g, onion/tomato/garlic 80g, spices ~2g (cumin/turmeric add iron)",
+      "confidence": "low",
+      "note": "Recipe-dependent. Most of the iron comes from lentils, with a little from spices and coconut milk."
+    },
+    {
+      "id": "v74",
+      "name": "Greek Chickpea & Feta Salad",
+      "values": [
+        3.8,
+        210,
+        2.6,
+        0.5,
+        0.2
+      ],
+      "source": "Built from ingredients: chickpeas cooked 120g, feta 30g (USDA SR 01019: Ca 493, Zn 2.88, B12 1.69 per 100g), cucumber/tomato/onion/pepper 90g, olives 10g, olive oil 10g",
+      "confidence": "low",
+      "note": "Depends on the chickpea and feta portions."
+    },
+    {
+      "id": "v75",
+      "name": "High-Protein Chia & Berry Pudding",
+      "values": [
+        2.5,
+        320,
+        1.6,
+        1,
+        4.4
+      ],
+      "source": "Built from ingredients: chia 24g (USDA SR 12006), fortified soy milk ~150ml (Silk-type label), berries 50g",
+      "confidence": "low",
+      "note": "B12 and calcium depend on the milk or yogurt base. Unfortified milk would give B12 0 and calcium about 170 mg."
+    },
+    {
+      "id": "v76",
+      "name": "Quinoa & Edamame Protein Power Bowl",
+      "values": [
+        4.8,
+        120,
+        3.1,
+        0,
+        0.4
+      ],
+      "source": "Built from ingredients: quinoa cooked 150g, edamame prepared 75g, mixed veg 60g, tahini dressing 10g (USDA SR Legacy)",
+      "confidence": "low",
+      "note": "Recipe-dependent."
+    },
+    {
+      "id": "v77",
+      "name": "Mediterranean Baked Falafel (4 Patties)",
+      "values": [
+        4.1,
+        64,
+        1.8,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 16158 Falafel, home-prepared (via nutritionvalue.org: per 100g Fe 3.41, Ca 53, Zn 1.53, ALA 0.11), scaled to 120g",
+      "confidence": "medium",
+      "note": "The USDA entry is fried. Baked falafel has similar minerals per gram but less fat."
+    },
+    {
+      "id": "v78",
+      "name": "Vegetarian Black Bean & Sweet Potato Chili",
+      "values": [
+        4,
+        100,
+        2,
+        0,
+        0.1
+      ],
+      "source": "Built from ingredients: black beans cooked 130g, sweet potato 80g, canned tomatoes 80g, onion/pepper 40g, chili spices 2g (USDA SR Legacy)",
+      "confidence": "low",
+      "note": "Recipe-dependent."
+    },
+    {
+      "id": "v79",
+      "name": "Sourdough Avocado & Hemp Toast",
+      "values": [
+        3.1,
+        41,
+        1.9,
+        0,
+        1
+      ],
+      "source": "Built from ingredients: USDA SR Bread, french/vienna (incl. sourdough) 50g + avocado 60g + USDA hemp seed, hulled 10g + ~5g olive oil",
+      "confidence": "medium",
+      "note": "Omega-3 is almost all ALA from about 1 tbsp hemp. Scales with how much hemp is used."
+    },
+    {
+      "id": "v80",
+      "name": "Overnight Protein Oats with Berries & PB",
+      "values": [
+        2.3,
+        250,
+        2.8,
+        0.9,
+        0.1
+      ],
+      "source": "Built from ingredients: rolled oats 40g + 2% milk 120g + Greek yogurt 50g + berries 50g + peanut butter 16g (USDA SR)",
+      "confidence": "low",
+      "note": "Recipe-dependent. Zinc comes mostly from oats, PB and dairy. Whey or plant protein powder would add calcium."
+    },
+    {
+      "id": "v81",
+      "name": "Paneer Tikka (Grilled Spiced Paneer & Peppers)",
+      "values": [
+        1,
+        510,
+        2.2,
+        1.1,
+        0.1
+      ],
+      "source": "Built: paneer 100g (Amul label Ca 480/100g; zinc per USDA FNDDS Cheese, paneer) + peppers/onion 60g + yogurt marinade 20g + spices",
+      "confidence": "low",
+      "note": "Paneer calcium varies (about 360-600 mg/100g). USDA FNDDS paneer lists B12 2.6 ug/100g, which looks high. B12 here is estimated from milk yield (~1 ug/100g)."
+    },
+    {
+      "id": "v82",
+      "name": "Steamed Edamame in Pods with Sea Salt",
+      "values": [
+        1.8,
+        50,
+        1.1,
+        0,
+        0.3
+      ],
+      "source": "USDA SR Edamame, frozen, prepared; ~80g edible beans from 150g in pods (about 47% pod refuse)",
+      "confidence": "medium"
+    },
+    {
+      "id": "v83",
+      "name": "Beyond Burger Patty",
+      "values": [
+        4,
+        120,
+        1.2,
+        0,
+        0.1
+      ],
+      "source": "Beyond Meat site label 2025 (Beyond Burger, avocado-oil recipe): iron 4 mg, calcium 120 mg",
+      "confidence": "medium",
+      "note": "Zinc and omega-3 are not on the label. They are estimated from pea/faba protein and avocado oil, so low confidence for those two. US product is not B12 fortified."
+    },
+    {
+      "id": "v84",
+      "name": "Impossible Burger Patty",
+      "values": [
+        4.2,
+        170,
+        5.5,
+        3.1,
+        0
+      ],
+      "source": "Impossible Burger label (4 oz): iron 4.2 mg, calcium 170 mg, zinc 5.5 mg (50% DV), B12 3.1 ug (130% DV)",
+      "confidence": "medium",
+      "note": "Fortified. An older USDA Branded entry lists zinc 7.5 mg and B12 7.8 ug, which looks like an older formulation. Omega-3 is negligible (sunflower and coconut oil)."
+    },
+    {
+      "id": "v85",
+      "name": "Black Bean Veggie Burger Patty",
+      "values": [
+        1.5,
+        60,
+        0.6,
+        0,
+        0.1
+      ],
+      "source": "MorningStar Farms Spicy Black Bean Burger label (67g): iron 1.5 mg, calcium 60 mg",
+      "confidence": "medium",
+      "note": "Zinc and omega-3 are not on the label. Both are estimated (low)."
+    },
+    {
+      "id": "v86",
+      "name": "Plant-Based Chicken Nuggets",
+      "values": [
+        1.6,
+        40,
+        0.6,
+        0,
+        0.4
+      ],
+      "source": "MorningStar Farms Chik'n Nuggets SmartLabel (4 nuggets, 86g): iron 1.6 mg, calcium 40 mg",
+      "confidence": "medium",
+      "note": "Zinc is estimated. Omega-3 is estimated from ~9g fat in canola/soy frying oil (low confidence). Brand-dependent."
+    },
+    {
+      "id": "v87",
+      "name": "Plant-Based Breakfast Sausage",
+      "values": [
+        2.6,
+        10,
+        0.5,
+        3.1,
+        0.2
+      ],
+      "source": "MorningStar Farms Veggie Breakfast Sausage Links label (2 links, 45g): iron 2.6 mg, calcium 10 mg, B12 130% DV",
+      "confidence": "medium",
+      "note": "B12-fortified. Zinc and omega-3 are not on the label, so they are estimated (low)."
+    },
+    {
+      "id": "v88",
+      "name": "Baked Marinated Tofu (Store-Bought)",
+      "values": [
+        2.1,
+        150,
+        1.3,
+        0,
+        0.5
+      ],
+      "source": "Nasoya Baked Marinated Tofu (USDA Branded, 57g: Fe 1.44 mg, Ca 100 mg) scaled to 85g; zinc and ALA estimated from USDA firm tofu",
+      "confidence": "medium",
+      "note": "Brand-dependent. Trader Joe's Organic Baked Teriyaki is about 2.6 mg iron and 69 mg calcium per 85g. Calcium depends on whether it is calcium-sulfate- or nigari-set."
+    },
+    {
+      "id": "v89",
+      "name": "Unsweetened Soy Milk",
+      "values": [
+        1,
+        470,
+        0.3,
+        2.4,
+        0.3
+      ],
+      "source": "Silk Unsweet Soymilk label (silk.com 2025): iron 1 mg, calcium 470 mg, B12 2.4 ug; zinc from USDA SR soymilk unfortified (~0.12 mg/100g)",
+      "confidence": "medium",
+      "note": "Calcium is brand-dependent: Silk Organic Unsweetened and others are about 280-300 mg. Omega-3 is ALA from about 4.5 g soybean fat (estimated)."
+    },
+    {
+      "id": "v90",
+      "name": "Oat Milk (Original)",
+      "values": [
+        0.3,
+        350,
+        0.2,
+        0.4,
+        0.4
+      ],
+      "source": "Oatly Oatmilk Original label (oatly.com 2025): iron 0.3 mg, calcium 350 mg, B12 0.4 ug (15% DV), fat 5 g",
+      "confidence": "medium",
+      "note": "Omega-3 is estimated as ALA from canola (rapeseed) oil, ~9% of ~4.5 g fat (low). Zinc is not on the label and is estimated."
+    },
+    {
+      "id": "v91",
+      "name": "Unsweetened Almond Milk",
+      "values": [
+        0.4,
+        470,
+        0.1,
+        1.1,
+        0
+      ],
+      "source": "Silk Unsweet Almondmilk label (silk.com 2025): iron 0.4 mg, calcium 470 mg, B12 1.1 ug (45% DV)",
+      "confidence": "high",
+      "note": "Zinc is not on the label (estimated). Other brands differ: Almond Breeze is not B12-fortified."
+    },
+    {
+      "id": "v92",
+      "name": "2% Reduced-Fat Milk",
+      "values": [
+        0,
+        293,
+        1.2,
+        1.3,
+        0
+      ],
+      "source": "USDA SR 171267 Milk, reduced fat, 2%, w/ added vit A & D (per 100g: Fe 0.02, Ca 120, Zn 0.48, B12 0.53, ALA 0.008)",
+      "confidence": "high"
+    },
+    {
+      "id": "v93",
+      "name": "Whole Milk",
+      "values": [
+        0.1,
+        276,
+        0.9,
+        1.1,
+        0.2
+      ],
+      "source": "USDA SR Milk, whole, 3.25%, w/ added vit D (per 244g: Fe 0.07, Ca 276, Zn 0.90, B12 1.10, 18:3 0.183 g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v94",
+      "name": "Greek Yogurt (2% Plain)",
+      "values": [
+        0.1,
+        196,
+        1,
+        0.9,
+        0
+      ],
+      "source": "USDA SR Yogurt, Greek, plain, lowfat (per 100g: Fe 0.04, Ca 115, Zn 0.60, B12 0.52)",
+      "confidence": "high"
+    },
+    {
+      "id": "v95",
+      "name": "Icelandic Skyr (Plain, Non-Fat)",
+      "values": [
+        0.1,
+        150,
+        0.8,
+        1.2,
+        0
+      ],
+      "source": "Siggi's Plain Nonfat Skyr label 150g (Ca 150 mg, B12 1.2 ug); zinc and iron from USDA SR Greek nonfat yogurt",
+      "confidence": "medium",
+      "note": "Brand labels list calcium at 130-150 mg."
+    },
+    {
+      "id": "v96",
+      "name": "Plain Kefir (Low-Fat)",
+      "values": [
+        0.1,
+        312,
+        1.1,
+        0.7,
+        0
+      ],
+      "source": "USDA SR Kefir, LIFEWAY, plain, lowfat (per 243g: Fe 0.10, Ca 316, Zn 1.12, B12 0.70) scaled to 240g",
+      "confidence": "high"
+    },
+    {
+      "id": "v97",
+      "name": "Part-Skim String Cheese",
+      "values": [
+        0.1,
+        195,
+        1,
+        0.5,
+        0
+      ],
+      "source": "USDA SR Cheese, mozzarella, part-skim, low moisture (per 100g: Fe 0.22, Ca 697, Zn 3.62, B12 1.68)",
+      "confidence": "high",
+      "note": "Brand string cheese labels usually say 200 mg calcium."
+    },
+    {
+      "id": "v98",
+      "name": "Vegetarian Parmesan (Microbial Rennet, Grated)",
+      "values": [
+        0,
+        85,
+        0.4,
+        0.1,
+        0
+      ],
+      "source": "USDA SR Cheese, parmesan, grated (per 100g: Fe 0.49, Ca 853, Zn 4.2, B12 1.4)",
+      "confidence": "medium",
+      "note": "Hard block Parmesan grated fresh is about 118 mg calcium per 10g (SR Cheese, parmesan, hard). nutritionvalue.org also flags possible USDA data issues for the grated entry."
+    },
+    {
+      "id": "v99",
+      "name": "Cream Cheese",
+      "values": [
+        0,
+        28,
+        0.1,
+        0.1,
+        0
+      ],
+      "source": "USDA SR Cheese, cream (per 14.5g: Fe 0.02, Ca 14, Zn 0.07, B12 0.03, n-3 ~0.02 g) x2",
+      "confidence": "high"
+    },
+    {
+      "id": "v100",
+      "name": "Sour Cream",
+      "values": [
+        0,
+        26,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Sour cream, regular (per 15g: Fe 0.00, Ca 16, Zn 0.06, B12 0.01)",
+      "confidence": "high"
+    },
+    {
+      "id": "v101",
+      "name": "Salted Butter",
+      "values": [
+        0,
+        3,
+        0,
+        0,
+        0
+      ],
+      "source": "USDA SR 01001 Butter, salted (per 100g: Fe 0.02, Ca 24, Zn 0.09, B12 0.17, ALA 0.32)",
+      "confidence": "high"
+    },
+    {
+      "id": "v102",
+      "name": "Hard-Boiled Egg",
+      "values": [
+        0.6,
+        25,
+        0.5,
+        0.55,
+        0
+      ],
+      "source": "USDA SR Egg, whole, cooked, hard-boiled (per 136g: Fe 1.62, Ca 68, Zn 1.43, B12 1.51, n-3 ~0.06-0.1 g)",
+      "confidence": "high",
+      "note": "Omega-3 is ~0.03-0.04 g per egg, which rounds to 0. Omega-3-enriched eggs are about 0.1-0.3 g."
+    },
+    {
+      "id": "v103",
+      "name": "Vegetarian Refried Beans",
+      "values": [
+        2,
+        42,
+        0.9,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Refried beans, canned, vegetarian (per 242g: Fe 4.11, Ca 85, Zn 1.79, ALA 0.426)",
+      "confidence": "high"
+    },
+    {
+      "id": "v104",
+      "name": "Cannellini / White Beans (Cooked)",
+      "values": [
+        3.3,
+        81,
+        1.2,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Beans, white, mature, boiled (per 179g: Fe 6.62, Ca 161, Zn 2.47, 18:3 0.124)",
+      "confidence": "high"
+    },
+    {
+      "id": "v105",
+      "name": "Black-Eyed Peas (Cooked)",
+      "values": [
+        2.2,
+        21,
+        1.1,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Cowpeas (blackeyes), mature, boiled (per 171g: Fe 4.29, Ca 41, Zn 2.21, 18:3 0.142)",
+      "confidence": "high"
+    },
+    {
+      "id": "v106",
+      "name": "Chickpea Pasta (Banza, Dry)",
+      "values": [
+        4,
+        40,
+        1.6,
+        0,
+        0.1
+      ],
+      "source": "Banza chickpea pasta label via USDA Branded (56g: iron 4 mg, calcium 40 mg; ingredients chickpeas, tapioca, pea protein)",
+      "confidence": "medium",
+      "note": "Zinc and omega-3 are not on the label. They are estimated from chickpeas (~45g chickpea per serving). Iron varies on older labels and other shapes."
+    },
+    {
+      "id": "v107",
+      "name": "Red Lentil Pasta (Dry)",
+      "values": [
+        3,
+        17,
+        1.6,
+        0,
+        0.1
+      ],
+      "source": "Barilla Red Lentil Rotini label (56g dry: iron ~3 mg / 15% DV, calcium 17 mg)",
+      "confidence": "medium",
+      "note": "Zinc and omega-3 are estimated from USDA dry red lentils."
+    },
+    {
+      "id": "v108",
+      "name": "White Pasta / Spaghetti (Cooked)",
+      "values": [
+        1.8,
+        10,
+        0.7,
+        0,
+        0
+      ],
+      "source": "USDA SR Pasta, cooked, enriched (per 124g: Fe 1.59, Ca 9, Zn 0.63, ALA 0.03)",
+      "confidence": "high"
+    },
+    {
+      "id": "v109",
+      "name": "Plain Bagel",
+      "values": [
+        3.7,
+        100,
+        0.9,
+        0,
+        0
+      ],
+      "source": "Iron and zinc: USDA SR Bagels, plain, enriched (Fe 3.53, Zn 0.82 per 99g). Calcium: Thomas' Plain Bagel label (90-100 mg/95g) scaled to 105g",
+      "confidence": "medium",
+      "note": "Calcium depends a lot on calcium propionate: USDA gives 230 mg with it and 19 mg without (typical bakery bagel)."
+    },
+    {
+      "id": "v110",
+      "name": "Whole Wheat English Muffin",
+      "values": [
+        1.6,
+        175,
+        1,
+        0,
+        0
+      ],
+      "source": "USDA SR Muffins, English, whole-wheat (per 28.35g: Fe 0.69, Ca 75, Zn 0.45)",
+      "confidence": "high"
+    },
+    {
+      "id": "v111",
+      "name": "Whole Wheat Sandwich Bread",
+      "values": [
+        0.8,
+        52,
+        0.6,
+        0,
+        0
+      ],
+      "source": "USDA SR Bread, whole-wheat, commercially prepared (per 32g slice: Fe 0.79, Ca 52, Zn 0.57, ALA 0.044)",
+      "confidence": "high"
+    },
+    {
+      "id": "v112",
+      "name": "Whole Wheat Pita",
+      "values": [
+        2,
+        10,
+        1,
+        0,
+        0
+      ],
+      "source": "USDA SR Bread, pita, whole-wheat (per 64g: Fe 1.96, Ca 10, Zn 0.97, 18:3 0.033)",
+      "confidence": "high"
+    },
+    {
+      "id": "v113",
+      "name": "Garlic Naan",
+      "values": [
+        2.9,
+        64,
+        0.9,
+        0.1,
+        0.2
+      ],
+      "source": "Stonefire Roasted Garlic Naan label (63g: iron 2 mg, calcium 45 mg) scaled to 90g; zinc between USDA naan and enriched flour",
+      "confidence": "medium",
+      "note": "Zinc and omega-3 are estimated. Omega-3 assumes canola oil/garlic butter (low). USDA FNDDS plain naan is lower in iron (about 1.7 mg/90g)."
+    },
+    {
+      "id": "v114",
+      "name": "Flour Tortilla (Large)",
+      "values": [
+        2.4,
+        118,
+        0.4,
+        0,
+        0.3
+      ],
+      "source": "USDA SR Tortillas, ready-to-bake or -fry, flour, shelf stable (per 49g: Fe 1.63, Ca 80, Zn 0.28, 18:3 0.19)",
+      "confidence": "medium",
+      "note": "The refrigerated version is about 2.6 mg iron, 105 mg calcium and 0.2 g omega-3 per 72g. Omega-3 depends on the shortening (soy/canola vs lard/palm)."
+    },
+    {
+      "id": "v115",
+      "name": "Couscous (Cooked)",
+      "values": [
+        0.6,
+        13,
+        0.4,
+        0,
+        0
+      ],
+      "source": "USDA SR Couscous, cooked (per 157g: Fe 0.60, Ca 13, Zn 0.41)",
+      "confidence": "high"
+    },
+    {
+      "id": "v116",
+      "name": "Pearl Barley (Cooked)",
+      "values": [
+        2.1,
+        17,
+        1.3,
+        0,
+        0
+      ],
+      "source": "USDA SR Barley, pearled, cooked (per 157g: Fe 2.09, Ca 17, Zn 1.29, 18:3 0.033)",
+      "confidence": "high"
+    },
+    {
+      "id": "v117",
+      "name": "Soba Noodles (Cooked)",
+      "values": [
+        0.5,
+        5,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Noodles, japanese, soba, cooked (per 114g: Fe 0.55, Ca 5, Zn 0.14)",
+      "confidence": "high"
+    },
+    {
+      "id": "v118",
+      "name": "Udon Noodles (Cooked)",
+      "values": [
+        0.4,
+        12,
+        0.2,
+        0,
+        0
+      ],
+      "source": "Japan MEXT Standard Tables (8th rev.) udon, boiled: Fe 0.2, Ca 6, Zn 0.1 /100g",
+      "confidence": "medium",
+      "note": "No USDA SR/FNDDS udon entry. Most udon is made from unenriched flour; an enriched US brand could have 2-3x the iron."
+    },
+    {
+      "id": "v119",
+      "name": "Granola (Oat & Honey)",
+      "values": [
+        1.7,
+        28,
+        1.4,
+        0,
+        0.3
+      ],
+      "source": "USDA FNDDS 'Cereal, granola' (via nutritionvalue.org; 110g: Fe 3.38, Ca 56, Zn 2.83, 18:3 0.568)",
+      "confidence": "medium",
+      "note": "Brand-dependent. Omega-3 depends on the oil used (canola gives ~0.3g)."
+    },
+    {
+      "id": "v120",
+      "name": "Cheerios (Original)",
+      "values": [
+        12.6,
+        130,
+        2.2,
+        0.5,
+        0
+      ],
+      "source": "General Mills Original Cheerios label (cheerios.com 2026): 1.5 cup 39g; Fe 12.6mg, Ca 130mg, Zn 20% DV, B12 20% DV",
+      "confidence": "high",
+      "note": "Zinc and B12 come from %DV only (20% of 11mg, 20% of 2.4ug). The old values (zinc 5, B12 0) were wrong."
+    },
+    {
+      "id": "v121",
+      "name": "Plain Brown Rice Cakes",
+      "values": [
+        0.3,
+        2,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Snacks, rice cakes, brown rice, plain, unsalted' (nutritionvalue.org; 9g cake: Fe 0.13, Ca 1, Zn 0.27)",
+      "confidence": "high"
+    },
+    {
+      "id": "v122",
+      "name": "Buttermilk Pancakes",
+      "values": [
+        2,
+        183,
+        0.7,
+        0.2,
+        0.6
+      ],
+      "source": "USDA SR Legacy 'Pancakes, buttermilk, prepared from recipe' (nutritionvalue.org; 28g: Fe 0.48, Ca 45, Zn 0.18, B12 0.05, 18:3 0.144)",
+      "confidence": "medium",
+      "note": "Omega-3 comes from the vegetable (soybean) oil in the SR recipe. It is near 0 if made with butter or from many mixes."
+    },
+    {
+      "id": "v123",
+      "name": "Frozen Waffles (Whole Grain)",
+      "values": [
+        3.6,
+        260,
+        0.6,
+        0.2,
+        0.2
+      ],
+      "source": "Kellogg's Eggo Nutri-Grain Whole Wheat label (2 waffles 70g: Fe 3.6mg, Ca 260mg, B12 10% DV); zinc from USDA Branded entry (0.63mg)",
+      "confidence": "medium",
+      "note": "Omega-3 estimated from 1.75g PUFA (soybean oil, about 12% ALA). Low confidence on omega-3."
+    },
+    {
+      "id": "v124",
+      "name": "Cauliflower Florets (Steamed)",
+      "values": [
+        0.4,
+        20,
+        0.2,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 170397 Cauliflower, cooked, boiled, drained, without salt (Fe 0.32, Ca 16, Zn 0.17, 18:3 0.167 /100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v125",
+      "name": "Baby Carrots",
+      "values": [
+        0.9,
+        32,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Carrots, baby, raw' (nutritionvalue.org; 15g: Fe 0.13, Ca 5, Zn 0.03)",
+      "confidence": "high"
+    },
+    {
+      "id": "v126",
+      "name": "Green Beans (Steamed)",
+      "values": [
+        0.8,
+        55,
+        0.3,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 'Beans, snap, green, cooked, boiled, drained, without salt' (nutritionvalue.org; 125g: Fe 0.81, Ca 55, Zn 0.31, 18:3 0.111)",
+      "confidence": "high"
+    },
+    {
+      "id": "v127",
+      "name": "Brussels Sprouts (Roasted)",
+      "values": [
+        1.9,
+        56,
+        0.5,
+        0,
+        0.3
+      ],
+      "source": "USDA SR Legacy 'Brussels sprouts, cooked, boiled, drained, without salt' (Fe 1.2, Ca 36, Zn 0.33, 18:3 0.17 /100g)",
+      "confidence": "medium",
+      "note": "Used boiled as a stand-in for roasted. Roasting oil adds fat and may add ALA."
+    },
+    {
+      "id": "v128",
+      "name": "Romaine Lettuce (Chopped)",
+      "values": [
+        0.9,
+        31,
+        0.2,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 'Lettuce, cos or romaine, raw' (nutritionvalue.org; 47g: Fe 0.46, Ca 16, Zn 0.11, 18:3 0.053)",
+      "confidence": "high"
+    },
+    {
+      "id": "v129",
+      "name": "Green Peas (Frozen, Cooked)",
+      "values": [
+        1.2,
+        19,
+        0.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Peas, green, frozen, cooked, boiled, drained, without salt' (nutritionvalue.org; 80g: Fe 1.22, Ca 19, Zn 0.54, 18:3 0.019)",
+      "confidence": "high"
+    },
+    {
+      "id": "v130",
+      "name": "Eggplant (Roasted)",
+      "values": [
+        0.2,
+        6,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Eggplant, cooked, boiled, drained, without salt' (nutritionvalue.org; 99g: Fe 0.25, Ca 6, Zn 0.12, 18:3 0.015)",
+      "confidence": "high",
+      "note": "Used boiled as a stand-in for roasted."
+    },
+    {
+      "id": "v131",
+      "name": "Butternut Squash (Roasted)",
+      "values": [
+        1.2,
+        84,
+        0.3,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Squash, winter, butternut, cooked, baked, without salt' (nutritionvalue.org; 205g: Fe 1.23, Ca 84, Zn 0.27, 18:3 0.049)",
+      "confidence": "high"
+    },
+    {
+      "id": "v132",
+      "name": "Beets (Cooked)",
+      "values": [
+        0.7,
+        14,
+        0.3,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Beets, cooked, boiled, drained' (nutritionvalue.org; 85g: Fe 0.67, Ca 14)",
+      "confidence": "high"
+    },
+    {
+      "id": "v133",
+      "name": "Navel Orange",
+      "values": [
+        0.2,
+        60,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Oranges, raw, navels' (nutritionvalue.org; 165g: Fe 0.21, Ca 71, Zn 0.13, 18:3 0.015)",
+      "confidence": "high"
+    },
+    {
+      "id": "v134",
+      "name": "Mango (Sliced)",
+      "values": [
+        0.3,
+        18,
+        0.1,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 'Mangos, raw' (nutritionvalue.org; 165g: Fe 0.26, Ca 18, Zn 0.15, 18:3 0.084)",
+      "confidence": "high"
+    },
+    {
+      "id": "v135",
+      "name": "Red Grapes",
+      "values": [
+        0.5,
+        15,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Grapes, red or green (European type), raw' (nutritionvalue.org; 151g: Fe 0.54, Ca 15, Zn 0.11, 18:3 0.017)",
+      "confidence": "high"
+    },
+    {
+      "id": "v136",
+      "name": "Pineapple Chunks",
+      "values": [
+        0.5,
+        21,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Pineapple, raw, all varieties' (nutritionvalue.org; 165g: Fe 0.48, Ca 21, Zn 0.20, 18:3 0.028)",
+      "confidence": "high"
+    },
+    {
+      "id": "v137",
+      "name": "Watermelon (Diced)",
+      "values": [
+        0.4,
+        11,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Watermelon, raw' (nutritionvalue.org; 154g: Fe 0.37, Ca 11, Zn 0.15, 18:3 0)",
+      "confidence": "high"
+    },
+    {
+      "id": "v138",
+      "name": "Raspberries (Fresh)",
+      "values": [
+        0.8,
+        31,
+        0.5,
+        0,
+        0.2
+      ],
+      "source": "USDA SR Legacy 'Raspberries, raw' (nutritionvalue.org; 123g: Fe 0.85, Ca 31, Zn 0.52, 18:3 0.155)",
+      "confidence": "high"
+    },
+    {
+      "id": "v139",
+      "name": "Bartlett Pear",
+      "values": [
+        0.3,
+        16,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Pears, bartlett, raw' (nutritionvalue.org; 140g: Fe 0.27, Ca 13, Zn 0.11)",
+      "confidence": "high"
+    },
+    {
+      "id": "v140",
+      "name": "Medjool Dates",
+      "values": [
+        0.4,
+        31,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Dates, medjool' (nutritionvalue.org; 24g: Fe 0.22, Ca 15, Zn 0.11)",
+      "confidence": "high",
+      "note": "The source has no fatty-acid breakdown. Fat is only 0.15g/100g, so omega-3 is effectively 0."
+    },
+    {
+      "id": "v141",
+      "name": "Frozen Mixed Berries",
+      "values": [
+        0.8,
+        27,
+        0.4,
+        0,
+        0.1
+      ],
+      "source": "Built from USDA SR Legacy frozen unsweetened strawberries, blueberries, raspberries, blackberries (equal blend)",
+      "confidence": "medium",
+      "note": "Depends on the blend. Strawberry/blueberry-heavy mixes are closer to 0.6 Fe, 18 Ca, 0.2 Zn."
+    },
+    {
+      "id": "v142",
+      "name": "Roasted Cashews",
+      "values": [
+        1.7,
+        13,
+        1.6,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 170571 Nuts, cashew nuts, dry roasted, without salt (Fe 6.0, Ca 45, Zn 5.6, 18:3 0.161 /100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v143",
+      "name": "Pistachios (Shelled)",
+      "values": [
+        1.1,
+        29,
+        0.6,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 170184 Pistachio nuts, raw (Fe 3.92, Ca 105, Zn 2.2, 18:3 0.289 /100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v144",
+      "name": "Dry-Roasted Peanuts",
+      "values": [
+        0.4,
+        16,
+        0.8,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Peanuts, all types, dry-roasted, without salt' (nutritionvalue.org; 146g: Fe 2.31, Ca 85, Zn 4.04, 18:3 0.038)",
+      "confidence": "high"
+    },
+    {
+      "id": "v145",
+      "name": "Sunflower Seeds (Shelled)",
+      "values": [
+        1.1,
+        20,
+        1.5,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Seeds, sunflower seed kernels, dry roasted, without salt' (nutritionvalue.org; 128g: Fe 4.86, Ca 90, Zn 6.77, 18:3 0.088)",
+      "confidence": "high"
+    },
+    {
+      "id": "v146",
+      "name": "Tahini (Sesame Paste)",
+      "values": [
+        1.3,
+        64,
+        0.7,
+        0,
+        0.1
+      ],
+      "source": "USDA SR Legacy 'Seeds, sesame butter, tahini, from roasted and toasted kernels' 1 tbsp (Fe 1.34, Ca 63.9, Zn 0.69)",
+      "confidence": "medium",
+      "note": "Calcium depends on the brand. Hulled-seed tahini labels often show much less (~10-30mg/tbsp); USDA's 'most common type' gives 64mg. Omega-3 estimated from about 0.37g ALA/100g."
+    },
+    {
+      "id": "v147",
+      "name": "Virgin Coconut Oil",
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "source": "USDA SR Legacy 'Oil, coconut' (Fe 0.05, Ca 1, Zn 0.02, 18:3 0.019 /100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v148",
+      "name": "Fresh Guacamole",
+      "values": [
+        0.2,
+        4,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA FNDDS 63409010 'Guacamole, NFS' (nutritionvalue.org; 15g: Fe 0.08, Ca 2, Zn 0.09, 18:3 0.018)",
+      "confidence": "high"
+    },
+    {
+      "id": "v149",
+      "name": "Cheese Pizza Slice (Regular Crust)",
+      "values": [
+        2.7,
+        201,
+        1.4,
+        0.4,
+        0.2
+      ],
+      "source": "USDA FNDDS 58106225 'Pizza, cheese, from restaurant or fast food, medium crust' (119g: Fe 2.95, Ca 224, Zn 1.59, B12 0.50, 18:3 0.211)",
+      "confidence": "high"
+    },
+    {
+      "id": "v150",
+      "name": "Veggie Pizza Slice",
+      "values": [
+        2.8,
+        212,
+        1.5,
+        0.5,
+        0.2
+      ],
+      "source": "USDA FNDDS 'Pizza, cheese, with vegetables, from restaurant or fast food, medium crust' (133g: Fe 3.01, Ca 226, Zn 1.62, B12 0.51, 18:3 0.211)",
+      "confidence": "high"
+    },
+    {
+      "id": "v151",
+      "name": "Bean & Cheese Burrito",
+      "values": [
+        4.7,
+        248,
+        1.7,
+        0.3,
+        0.7
+      ],
+      "source": "USDA SR Legacy 'Fast foods, burrito, with beans and cheese' (185g: Fe 4.38, Ca 229, Zn 1.59, B12 0.30, 18:3 0.622)",
+      "confidence": "medium",
+      "note": "Omega-3 comes mostly from the oil in refried beans and tortilla, so it varies by recipe."
+    },
+    {
+      "id": "v152",
+      "name": "Veggie Burrito Bowl (Rice, Beans, Salsa, Cheese)",
+      "values": [
+        7.3,
+        346,
+        4.7,
+        0.4,
+        0.6
+      ],
+      "source": "USDA FNDDS 'Burrito bowl, with beans' (225g: Fe 3.67, Ca 173, Zn 2.36, B12 0.20, 18:3 0.315), scaled to 450g",
+      "confidence": "medium",
+      "note": "FNDDS composition may differ from the app's rice/beans/salsa/cheese bowl. Iron is driven by beans and enriched rice."
+    },
+    {
+      "id": "v153",
+      "name": "Cheese Quesadilla",
+      "values": [
+        2.9,
+        488,
+        2.4,
+        0.6,
+        0.3
+      ],
+      "source": "USDA FNDDS 58104710 'Quesadilla, cheese only' (120g: Fe 2.46, Ca 418, Zn 2.03, B12 0.54, 18:3 0.240)",
+      "confidence": "high"
+    },
+    {
+      "id": "v154",
+      "name": "Black Bean Tacos (2)",
+      "values": [
+        2.5,
+        152,
+        1.9,
+        0.1,
+        0.6
+      ],
+      "source": "USDA FNDDS 'Taco, corn tortilla, with beans, cheese' (50g: Fe 0.62, Ca 38, Zn 0.47, B12 0.03, 18:3 0.141), scaled to 200g",
+      "confidence": "medium",
+      "note": "FNDDS bean type is unspecified (black beans are similar). Omega-3 depends on the cooking oil."
+    },
+    {
+      "id": "v155",
+      "name": "Classic Mac & Cheese",
+      "values": [
+        2.1,
+        340,
+        2.2,
+        0.5,
+        0.2
+      ],
+      "source": "USDA FNDDS 58145110 'Macaroni or noodles with cheese' (230g: Fe 2.44, Ca 391, Zn 2.48, B12 0.62, 18:3 0.244)",
+      "confidence": "high"
+    },
+    {
+      "id": "v156",
+      "name": "Vegetable Lasagna",
+      "values": [
+        1.9,
+        670,
+        3.7,
+        0.9,
+        0.2
+      ],
+      "source": "USDA FNDDS 'Lasagna, meatless, with vegetables' (227g: Fe 1.73, Ca 608, Zn 3.40, B12 0.79, 18:3 0.186)",
+      "confidence": "medium",
+      "note": "Calcium depends on the cheese load. USDA SR 'Lasagna, Vegetable, frozen, baked' scaled to 250g gives Fe 1.4, Ca 374, Zn 2.2, B12 1.5, omega-3 0.4."
+    },
+    {
+      "id": "v157",
+      "name": "Spaghetti Marinara",
+      "values": [
+        3.1,
+        50,
+        1.1,
+        0,
+        0.1
+      ],
+      "source": "USDA FNDDS 'Pasta with tomato-based sauce, home recipe' (via nutritionvalue.org), scaled to 300g",
+      "confidence": "medium",
+      "note": "ALA 0.15 g, right at the rounding boundary"
+    },
+    {
+      "id": "v158",
+      "name": "Grilled Cheese Sandwich",
+      "values": [
+        2.2,
+        441,
+        2.2,
+        0.4,
+        0.4
+      ],
+      "source": "USDA FNDDS 'Grilled cheese sandwich, cheddar cheese, on white bread' (116g sandwich), scaled to 120g",
+      "confidence": "medium",
+      "note": "Omega-3 comes mostly from ALA in the spread/oil (18:3 0.34 g per sandwich). If made with butter it would be about 0.1 g"
+    },
+    {
+      "id": "v159",
+      "name": "Peanut Butter & Jelly Sandwich",
+      "values": [
+        2.3,
+        128,
+        1.2,
+        0,
+        0.1
+      ],
+      "source": "USDA FNDDS 'Peanut butter and jelly sandwich, regular PB, regular jelly, on white bread' (via nutritionvalue.org)",
+      "confidence": "medium",
+      "note": "Calcium comes from enriched commercial white bread (FNDDS)"
+    },
+    {
+      "id": "v160",
+      "name": "Caprese Sandwich (Mozzarella, Tomato, Pesto)",
+      "values": [
+        4.5,
+        400,
+        3,
+        1.4,
+        0.3
+      ],
+      "source": "Built from USDA SR: French/Vienna bread 110g, whole-milk mozzarella 60g (SR 01026: Ca 505, Zn 2.92, B12 2.28 per 100g), tomato 35g, pesto 15g",
+      "confidence": "medium",
+      "note": "No FNDDS match. Enriched bread supplies most of the iron. Mozzarella makes the B12 and zinc higher than the old values"
+    },
+    {
+      "id": "v161",
+      "name": "Vegetable Fried Rice with Egg",
+      "values": [
+        1.4,
+        33,
+        2.1,
+        0.1,
+        0.4
+      ],
+      "source": "USDA FNDDS 'Rice, fried, meatless' (166g/cup), scaled to 300g; B12 adjusted for egg",
+      "confidence": "medium",
+      "note": "FNDDS lists 0 B12 even though the dish has egg (cholesterol 30mg/cup), so I estimated 0.1. Iron could reach about 3.5 mg if made with enriched white rice. Omega-3 comes from the soybean/canola cooking oil"
+    },
+    {
+      "id": "v162",
+      "name": "Tofu & Vegetable Stir-Fry",
+      "values": [
+        2.8,
+        231,
+        1.5,
+        0,
+        1.1
+      ],
+      "source": "USDA FNDDS 'Tofu and vegetables including carrots, broccoli, and/or dark-green leafy; no potatoes, with soy-based sauce' (217g/cup), scaled to 350g",
+      "confidence": "medium",
+      "note": "Depends heavily on the tofu type and amount: 120g calcium-sulfate tofu (SR 16127, Ca 683/100g) alone gives about 820 mg Ca and 3.2 mg Fe. Omega-3 comes from tofu plus soybean oil"
+    },
+    {
+      "id": "v163",
+      "name": "Chana Masala (Chickpea Curry)",
+      "values": [
+        4.5,
+        95,
+        2.3,
+        0,
+        0.2
+      ],
+      "source": "Built from USDA SR: chickpeas cooked from dry 150g (SR 16057), tomato/onion sauce 80g, oil 10g, spices",
+      "confidence": "medium",
+      "note": "No FNDDS match. With canned chickpeas iron is lower (about 3.5 mg)"
+    },
+    {
+      "id": "v164",
+      "name": "Palak Paneer (Spinach & Paneer)",
+      "values": [
+        4,
+        410,
+        1.9,
+        0.5,
+        0.2
+      ],
+      "source": "Built from USDA: cooked spinach 110g (SR 11458), paneer 60g (Ca ~400/100g), cream, tomato, onion, oil",
+      "confidence": "low",
+      "note": "No reliable USDA entry (the nutritionvalue 'Palak Paneer' entry gives only 60 mg Ca/100g, which looks wrong). Iron and calcium scale with the spinach:paneer ratio"
+    },
+    {
+      "id": "v165",
+      "name": "Vegetable Sushi Roll (Avocado & Cucumber)",
+      "values": [
+        0.5,
+        15,
+        0.7,
+        0,
+        0
+      ],
+      "source": "Built from USDA SR: unenriched sushi rice ~130g, nori 3g, Hass avocado 30g, cucumber 20g; checked against FNDDS 'Sushi roll, vegetable' (Fe 0.18, Ca 4.5, Zn 0.41 per 100g)",
+      "confidence": "medium",
+      "note": "Sesame seeds would add about 20 mg Ca and 0.3 mg Fe"
+    },
+    {
+      "id": "v166",
+      "name": "Shakshuka (Eggs in Tomato Sauce)",
+      "values": [
+        3.7,
+        110,
+        1.6,
+        0.9,
+        0.2
+      ],
+      "source": "Built from USDA SR: 2 large eggs 100g (SR 01123), canned tomatoes 150g, peppers/onion 40g, olive oil 10g, cumin/paprika",
+      "confidence": "medium"
+    },
+    {
+      "id": "v167",
+      "name": "Spinach & Feta Omelette (3 Eggs)",
+      "values": [
+        3.6,
+        262,
+        3,
+        1.8,
+        0.2
+      ],
+      "source": "Built from USDA SR: 3 large eggs 150g (SR 01123), feta 30g (SR 01019), raw spinach 30g, butter",
+      "confidence": "medium"
+    },
+    {
+      "id": "v168",
+      "name": "Minestrone Soup",
+      "values": [
+        1.7,
+        47,
+        0.9,
+        0,
+        0.1
+      ],
+      "source": "USDA FNDDS 'Soup, minestrone' (245g/cup), scaled to 360g",
+      "confidence": "medium",
+      "note": "Homemade versions with more beans/pasta run higher in iron (2-3 mg)"
+    },
+    {
+      "id": "v169",
+      "name": "Vegetarian Lentil Soup",
+      "values": [
+        4.9,
+        61,
+        2,
+        0,
+        0.1
+      ],
+      "source": "USDA FNDDS 'Soup, lentil' (255g/cup), scaled to 360g",
+      "confidence": "high"
+    },
+    {
+      "id": "v170",
+      "name": "Veggie Hummus Wrap",
+      "values": [
+        4.6,
+        160,
+        1.6,
+        0,
+        0.6
+      ],
+      "source": "Built from USDA: FNDDS 'Tortilla, flour' 70g (Fe 3.64, Ca 145/100g) + SR 'Hummus, commercial' 60g (ALA 0.71/100g) + mixed raw vegetables 120g",
+      "confidence": "medium",
+      "note": "Omega-3 comes mostly from the canola oil in commercial hummus. Homemade hummus made with olive oil would give about 0.2 g"
+    },
+    {
+      "id": "v171",
+      "name": "Egg & Cheese Breakfast Sandwich",
+      "values": [
+        3.2,
+        280,
+        2,
+        0.7,
+        0.1
+      ],
+      "source": "Built from USDA SR: English muffin enriched w/ Ca prop 57g (Fe 3.99, Ca 162/100g) + 1 large egg 50g + cheddar/American slice 20g + butter",
+      "confidence": "medium",
+      "note": "American cheese gives slightly more calcium than cheddar"
+    },
+    {
+      "id": "v172",
+      "name": "Avocado Toast (Whole Grain)",
+      "values": [
+        1.5,
+        80,
+        1.2,
+        0,
+        0.1
+      ],
+      "source": "Built from USDA: SR 'Bread, whole-wheat, commercially prepared' 45g (Fe 2.47, Ca 162, Zn 1.78/100g) + Hass avocado 60g (SR 09038)",
+      "confidence": "medium",
+      "note": "A drizzle of olive oil adds about 0.04 g ALA"
+    },
+    {
+      "id": "v173",
+      "name": "Plant Protein Bar (Generic)",
+      "values": [
+        3,
+        150,
+        2,
+        0,
+        0.1
+      ],
+      "source": "Not verified; no generic USDA entry. Current values kept, within the range of common plant bars (Clif, GoMacro, ALOHA)",
+      "confidence": "low",
+      "note": "Brand-dependent: fortified bars (e.g. Clif) give 200+ mg Ca, while unfortified bars (GoMacro, ALOHA) give about 50-60 mg"
+    },
+    {
+      "id": "v174",
+      "name": "Chewy Granola Bar",
+      "values": [
+        0.6,
+        25,
+        0.4,
+        0.1,
+        0.1
+      ],
+      "source": "USDA SR 'Snacks, granola bars, soft, uncoated, plain' (via nutritionvalue.org), scaled to 24g",
+      "confidence": "medium",
+      "note": "SR lists 0.39 ug B12/100g (from dairy ingredients). Brand-dependent"
+    },
+    {
+      "id": "v175",
+      "name": "Trail Mix (Nuts, Raisins, Chocolate)",
+      "values": [
+        0.8,
+        30,
+        0.9,
+        0,
+        0.1
+      ],
+      "source": "USDA SR 'Snacks, trail mix, with chocolate chips, salted nuts and seeds' (Fe 2.15, Ca 79, Zn 2.34/100g), scaled to 38g",
+      "confidence": "medium"
+    },
+    {
+      "id": "v176",
+      "name": "Air-Popped Popcorn",
+      "values": [
+        0.8,
+        2,
+        0.7,
+        0,
+        0
+      ],
+      "source": "USDA SR 167959 'Snacks, popcorn, air-popped' (Fe 3.19, Ca 7, Zn 3.08, 18:3 0.054 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v177",
+      "name": "Tortilla Chips",
+      "values": [
+        0.4,
+        30,
+        0.4,
+        0,
+        0.1
+      ],
+      "source": "USDA SR 'Snacks, tortilla chips, plain, white corn, salted' (Fe 1.52, Ca 106, Zn 1.38, ALA 0.23 per 100g)",
+      "confidence": "high",
+      "note": "SR lists 0.35 ug B12/100g, which is implausible for a plain corn product, so I set B12 to 0"
+    },
+    {
+      "id": "v178",
+      "name": "Fresh Salsa (Pico de Gallo)",
+      "values": [
+        0.1,
+        7,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA FNDDS 'Salsa, pico de gallo' (Fe 0.23, Ca 10.8, Zn 0.13 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v179",
+      "name": "Whole Wheat Crackers",
+      "values": [
+        0.9,
+        10,
+        0.7,
+        0,
+        0.2
+      ],
+      "source": "USDA SR/FNDDS 'Crackers, whole-wheat' (28g: Fe 0.94, Ca 10, Zn 0.74, ALA 0.23)",
+      "confidence": "medium",
+      "note": "Triscuit-style crackers made with canola oil are the source of the ALA"
+    },
+    {
+      "id": "v180",
+      "name": "Pretzels",
+      "values": [
+        1.3,
+        8,
+        0.3,
+        0,
+        0
+      ],
+      "source": "USDA SR 'Snacks, pretzels, hard, plain, salted' (enriched; Fe 4.59, Ca 28, Zn 1.02 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v181",
+      "name": "Raisins",
+      "values": [
+        0.8,
+        27,
+        0.2,
+        0,
+        0
+      ],
+      "source": "USDA SR 'Raisins, dark, seedless' (Fe 1.79, Ca 62, Zn 0.36 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v182",
+      "name": "Chocolate Chip Cookie",
+      "values": [
+        1.7,
+        7,
+        0.2,
+        0,
+        0.3
+      ],
+      "source": "USDA SR 'Cookies, chocolate chip, commercially prepared, regular, higher fat, enriched' (Fe 5.58, Ca 23, Zn 0.70, ALA 0.85 per 100g); FNDDS 'Cookie, chocolate chip' matches",
+      "confidence": "medium",
+      "note": "Homemade/bakery cookies made with butter have less iron (~1.0 mg) and much less omega-3 (~0.05 g)"
+    },
+    {
+      "id": "v183",
+      "name": "Vanilla Ice Cream",
+      "values": [
+        0.1,
+        84,
+        0.5,
+        0.3,
+        0.1
+      ],
+      "source": "USDA SR 'Ice creams, vanilla' (66g: Fe 0.06, Ca 84, Zn 0.46, B12 0.26, 18:3 0.115 g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v184",
+      "name": "Honey",
+      "values": [
+        0.1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "source": "USDA SR 19296 Honey (Fe 0.42, Ca 6, Zn 0.22 per 100g)",
+      "confidence": "high",
+      "note": "Taken from known SR values. Not re-fetched because of API rate limits"
+    },
+    {
+      "id": "v185",
+      "name": "Pure Maple Syrup",
+      "values": [
+        0,
+        40,
+        0.6,
+        0,
+        0
+      ],
+      "source": "USDA SR 'Syrups, maple' (Fe 0.10, Ca 100, Zn 1.45 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v186",
+      "name": "Strawberry Jam",
+      "values": [
+        0.1,
+        4,
+        0,
+        0,
+        0
+      ],
+      "source": "USDA SR 19297 Jams and preserves (Fe 0.49, Ca 20, Zn 0.07 per 100g)",
+      "confidence": "high",
+      "note": "Taken from known SR values. Not re-fetched because of API rate limits"
+    },
+    {
+      "id": "v187",
+      "name": "Orange Juice",
+      "values": [
+        0.5,
+        27,
+        0.1,
+        0,
+        0
+      ],
+      "source": "USDA SR 09206 Orange juice, raw (Fe 0.2, Ca 11, Zn 0.05 per 100g)",
+      "confidence": "high",
+      "note": "Unfortified juice. Calcium-fortified OJ gives about 350 mg Ca per cup. Taken from known SR values, not re-fetched"
+    },
+    {
+      "id": "v188",
+      "name": "Oat Milk Latte (Grande, 16 oz)",
+      "values": [
+        0.6,
+        530,
+        0.3,
+        1.9,
+        1
+      ],
+      "source": "Built from Oatly Barista Edition label (per 240ml: Ca 350mg, Fe 0.29mg, B12 1.2ug, fat 7g) at ~380g oat milk + 2 espresso shots",
+      "confidence": "low",
+      "note": "Assumes Starbucks uses Oatly Barista; I could not reach the official Starbucks label. Omega-3 is estimated from canola oil (~9% ALA of 2.9 g fat/100g). Zinc not on label (estimated)"
+    },
+    {
+      "id": "v189",
+      "name": "Caffè Latte with 2% Milk (Grande, 16 oz)",
+      "values": [
+        0.2,
+        450,
+        1.8,
+        2,
+        0
+      ],
+      "source": "Built from USDA SR 01079 2% milk (Ca ~120, Zn 0.48, B12 0.53 per 100g) at ~380g + 2 espresso shots; matches Starbucks' published ~450 mg Ca",
+      "confidence": "medium",
+      "note": "Starbucks label not fetched (page is JS-rendered)"
+    },
+    {
+      "id": "v190",
+      "name": "Black Coffee",
+      "values": [
+        0,
+        5,
+        0,
+        0,
+        0
+      ],
+      "source": "USDA SR 14209 Coffee, brewed (Ca 2, Fe 0.01, Zn 0.02 per 100g)",
+      "confidence": "high"
+    },
+    {
+      "id": "v191",
+      "name": "Fruit & Yogurt Smoothie",
+      "values": [
+        0.9,
+        383,
+        1.8,
+        1.4,
+        0.1
+      ],
+      "source": "USDA FNDDS 'Fruit smoothie, with whole fruit and dairy' (Ca 81, Zn 0.37, B12 0.30, Fe 0.19 per 100g), scaled to 473g",
+      "confidence": "medium",
+      "note": "Yogurt-heavy smoothies run higher in calcium"
+    }
+  ]
+}

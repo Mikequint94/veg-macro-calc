@@ -27,6 +27,11 @@ const RESPONSE_SCHEMA = {
         c: { type: 'NUMBER' },
         f: { type: 'NUMBER' },
         fiber: { type: 'NUMBER' },
+        iron: { type: 'NUMBER' },
+        calcium: { type: 'NUMBER' },
+        zinc: { type: 'NUMBER' },
+        b12: { type: 'NUMBER' },
+        omega3: { type: 'NUMBER' },
         isVegetarian: { type: 'BOOLEAN' },
         vegetarianNote: { type: 'STRING' },
         suggestedCategory: { type: 'STRING', enum: CATEGORIES },
@@ -46,6 +51,9 @@ Strictly return a valid JSON object matching the requested schema:
 - "c": Total Carbohydrates in grams per serving (number, rounded to 1 decimal).
 - "f": Total Fat in grams per serving (number, rounded to 1 decimal).
 - "fiber": Dietary Fiber in grams per serving (number, rounded to 1 decimal, 0 if ${isDescribe ? 'negligible' : 'not listed'}).
+- "iron", "calcium", "zinc": Milligrams per serving (numbers). ${isDescribe ? 'Estimate from typical ingredients.' : 'Convert %DV using 18mg iron, 1300mg calcium, 11mg zinc when only percentages are listed; omit if not listed.'}
+- "b12": Vitamin B12 in micrograms per serving (number). ${isDescribe ? 'Estimate; 0 for unfortified plant foods.' : 'Convert %DV using 2.4mcg; omit if not listed.'}
+- "omega3": Total omega-3 fats (ALA + EPA + DHA) in grams per serving (number). ${isDescribe ? 'Estimate.' : 'Omit if not listed.'}
 - "isVegetarian": Boolean (true if meatless/vegetarian; false if meat, poultry, fish, gelatin, lard, or slaughter animal products are detected).
 - "vegetarianNote": Concise explanation of vegetarian status${isDescribe ? ', plus a brief note on the main assumptions behind the estimate (portion size, cooking oil, etc.)' : ' (e.g. "100% vegetarian friendly", or highlight any flagged non-vegetarian ingredients)'}.
 - "suggestedCategory": One of ${JSON.stringify(CATEGORIES)} ("Snacks" covers snacks, sweets, and drinks).

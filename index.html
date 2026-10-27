@@ -111,6 +111,10 @@
             padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #334155;
         }
         .menu-item:hover { background: #f1f5f9; }
+        #more-menu.is-sheet {
+            left: 0.75rem; right: 0.75rem; width: auto; max-width: 28rem; margin-inline: auto;
+            bottom: calc(4.25rem + env(safe-area-inset-bottom));
+        }
         .menu-item i { width: 18px; text-align: center; }
         .quick-tile {
             display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px;
@@ -275,18 +279,10 @@
                     <i class="fa-solid fa-plus"></i> Add food
                 </button>
 
-                <div class="relative">
+                <div class="hidden lg:block">
                     <button id="more-menu-btn" onclick="toggleMoreMenu(event)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 flex items-center justify-center transition" title="More options" aria-label="More options">
                         <i class="fa-solid fa-ellipsis"></i>
                     </button>
-                    <div id="more-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 p-1.5 z-50 animate-fade-in">
-                        <button onclick="closeMoreMenu(); copyDailySummaryClipboard()" class="menu-item"><i class="fa-regular fa-copy text-slate-500"></i> Copy day summary</button>
-                        <button onclick="closeMoreMenu(); exportDailyLogCSV()" class="menu-item"><i class="fa-solid fa-file-csv text-slate-500"></i> Export day as CSV</button>
-                        <button onclick="cycleTheme()" class="menu-item"><i id="theme-menu-icon" class="fa-solid fa-circle-half-stroke text-indigo-500"></i> <span id="theme-menu-label">Theme: Auto</span></button>
-                        <button onclick="closeMoreMenu(); openSyncModal()" class="menu-item"><i class="fa-solid fa-cloud text-sky-500"></i> Account & sync</button>
-                        <div class="my-1 border-t border-slate-100"></div>
-                        <button onclick="closeMoreMenu(); openResetModal()" class="menu-item text-rose-600"><i class="fa-solid fa-rotate-left"></i> Reset day or data…</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -405,6 +401,19 @@
                                         <button onclick="adjustWater(1)" class="w-6 h-6 rounded-lg bg-sky-500 text-white hover:bg-sky-600 text-xs font-bold flex items-center justify-center transition">+</button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Micronutrients (opt-in from the More menu) -->
+                            <div id="micros-panel" data-micros class="hidden pt-2 border-t border-slate-100 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-flask text-violet-500 text-xs"></i>
+                                        <span class="text-[11px] font-bold text-slate-700">Key Vegetarian Micronutrients</span>
+                                    </div>
+                                    <span id="micros-coverage" class="text-[10px] text-slate-400"></span>
+                                </div>
+                                <div id="micros-list" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2"></div>
+                                <p class="text-[10px] text-slate-400">Estimates. Iron goal is 1.8× the standard RDA because plant iron absorbs less well.</p>
                             </div>
                         </div>
 
@@ -723,6 +732,17 @@
         </div>
     </main>
 
+    <!-- More menu: drops down from the header ⋯ on desktop, rises above the bottom bar on phones -->
+    <div id="more-menu" class="hidden fixed w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 p-1.5 z-50 animate-fade-in">
+        <button onclick="closeMoreMenu(); copyDailySummaryClipboard()" class="menu-item"><i class="fa-regular fa-copy text-slate-500"></i> Copy day summary</button>
+        <button onclick="closeMoreMenu(); exportDailyLogCSV()" class="menu-item"><i class="fa-solid fa-file-csv text-slate-500"></i> Export day as CSV</button>
+        <button onclick="cycleTheme()" class="menu-item"><i id="theme-menu-icon" class="fa-solid fa-circle-half-stroke text-indigo-500"></i> <span id="theme-menu-label">Theme: Auto</span></button>
+        <button onclick="toggleMicros()" class="menu-item"><i class="fa-solid fa-flask text-violet-500"></i> <span id="micros-menu-label">Micronutrients: Off</span></button>
+        <button onclick="closeMoreMenu(); openSyncModal()" class="menu-item"><i class="fa-solid fa-cloud text-sky-500"></i> Account & sync</button>
+        <div class="my-1 border-t border-slate-100"></div>
+        <button onclick="closeMoreMenu(); openResetModal()" class="menu-item text-rose-600"><i class="fa-solid fa-rotate-left"></i> Reset day or data…</button>
+    </div>
+
     <!-- Bottom Tab Bar (phones) -->
     <nav id="bottom-nav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200" style="padding-bottom: env(safe-area-inset-bottom);" aria-label="Sections">
         <div class="grid grid-cols-5 items-end max-w-md mx-auto px-2">
@@ -969,6 +989,31 @@
                         <label class="block text-[11px] font-bold text-emerald-700 mb-1">Dietary Fiber (g)</label>
                         <input id="cf-fiber" type="number" min="0" max="100" step="0.1" placeholder="3" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
                     </div>
+                    <div data-micros class="hidden">
+                        <div class="text-[11px] font-semibold text-slate-500 mb-1">Micronutrients (optional, per serving)</div>
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Iron (mg)</label>
+                                <input id="cf-fe" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Calcium (mg)</label>
+                                <input id="cf-ca" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Zinc (mg)</label>
+                                <input id="cf-zn" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-violet-600 mb-0.5">B12 (µg)</label>
+                                <input id="cf-b12" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Omega-3 (g)</label>
+                                <input id="cf-o3" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 font-semibold text-sm">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -1093,16 +1138,16 @@
 
     <!-- AI Nutrition Facts Label Scanner Modal -->
     <div id="scan-label-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in my-auto max-h-[92vh] flex flex-col">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in my-auto max-h-[92dvh] flex flex-col">
             <!-- Modal Header -->
-            <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white flex items-center justify-between shrink-0">
+            <div class="px-4 py-3 sm:px-5 sm:py-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
                         <i class="fa-solid fa-camera text-sm"></i>
                     </div>
                     <div>
                         <h3 class="font-bold text-sm sm:text-base leading-tight">AI Nutrition Label Scanner</h3>
-                        <p class="text-[11px] text-emerald-200/80">Gemini Vision Nutrition Extraction & Vegetarian Verifier</p>
+                        <p class="hidden sm:block text-[11px] text-emerald-200/80">Gemini Vision Nutrition Extraction & Vegetarian Verifier</p>
                     </div>
                 </div>
                 <button onclick="closeScanModal()" class="text-slate-400 hover:text-white transition">
@@ -1110,9 +1155,9 @@
                 </button>
             </div>
 
-            <div class="p-5 overflow-y-auto space-y-4">
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
                 <!-- STEP 1: Capture or Upload Screen -->
-                <div id="scan-step-input" class="space-y-4">
+                <div id="scan-step-input" class="space-y-3 sm:space-y-4">
                     <!-- Method Switcher Pills -->
                     <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
                         <button id="scan-tab-camera" onclick="switchScanMethod('camera')" class="py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-sm">
@@ -1133,7 +1178,7 @@
                                 Food Name (Optional Hint)
                             </label>
                             <input id="scan-hint-name" type="text" placeholder="e.g., Organic Edamame Pasta, Chobani Vanilla..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-xs sm:text-sm font-medium">
-                            <p class="text-[11px] text-slate-400 mt-1">Leave blank to let AI detect the product title automatically from the label.</p>
+                            <p class="hidden sm:block text-[11px] text-slate-400 mt-1">Leave blank to let AI detect the product title automatically from the label.</p>
                         </div>
                         <p id="ai-access-note" class="mt-1 text-[11px] text-slate-400"></p>
                     </div>
@@ -1154,7 +1199,7 @@
 
                     <!-- CAMERA VIEW CONTAINER -->
                     <div id="camera-view-panel" class="space-y-3">
-                        <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-4/3 flex items-center justify-center border border-slate-800">
+                        <div class="relative bg-slate-950 rounded-2xl overflow-hidden h-[36dvh] sm:h-auto sm:aspect-[4/3] flex items-center justify-center border border-slate-800">
                             <video id="camera-stream" autoplay playsinline muted class="w-full h-full object-cover"></video>
                             <canvas id="camera-canvas" class="hidden"></canvas>
                             
@@ -1317,6 +1362,31 @@
                                         <option value="MealPrep">🥗 Meal Prep Dishes</option>
                                         <option value="Snacks">🍿 Snacks, Sweets & Drinks</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div data-micros class="hidden pt-1">
+                                <div class="text-[11px] font-semibold text-slate-500 mb-0.5">Micronutrients (per serving, leave blank if unknown)</div>
+                                <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Iron (mg)</label>
+                                        <input id="scan-res-fe" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Calcium (mg)</label>
+                                        <input id="scan-res-ca" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Zinc (mg)</label>
+                                        <input id="scan-res-zn" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-violet-600 mb-0.5">B12 (µg)</label>
+                                        <input id="scan-res-b12" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-violet-600 mb-0.5">Omega-3 (g)</label>
+                                        <input id="scan-res-o3" type="number" min="0" max="5000" step="0.1" class="w-full px-2 py-1 rounded-lg border border-slate-200 font-semibold text-xs text-slate-900">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1588,6 +1658,68 @@
             { id: 'v191', name: 'Fruit & Yogurt Smoothie', category: 'Snacks', servingDesc: '16 oz (473ml)', grams: 473, cal: 280, p: 10, c: 54, f: 3, fiber: 4, icon: '🥤' }
         ];
 
+        /**************************************************************
+         * 1B. MICRONUTRIENTS (opt-in; shown when state.microsEnabled)
+         * Per serving: [iron mg, calcium mg, zinc mg, B12 µg, omega-3 g].
+         * Checked against USDA FoodData Central (SR Legacy / FNDDS) and brand labels;
+         * per-food sources and confidence are in micronutrient-sources.json.
+         **************************************************************/
+        const MICRO_KEYS = ['fe', 'ca', 'zn', 'b12', 'o3'];
+        const MICRO_DB = {
+            v1: [2.5, 70, 0.4, 0, 0], v2: [2.5, 229, 1.5, 0, 0.6], v3: [3.8, 125, 2.4, 0, 0.9], v4: [2.1, 96, 1.6, 0.1, 0.1],
+            v5: [4.2, 119, 1.2, 0, 0], v6: [3.5, 98, 2.1, 0, 0.6], v7: [2, 85, 2.3, 0, 0.2], v8: [4.5, 45, 1, 0, 0],
+            v9: [4.4, 53, 1.2, 0, 0.1], v10: [1.3, 8, 3, 20, 0], v11: [0.9, 28, 0.6, 0.45, 0.1], v12: [0.1, 8, 0, 0.1, 0],
+            v13: [0.1, 187, 0.9, 1.3, 0], v14: [0.1, 117, 0.7, 0.5, 0], v15: [0.2, 480, 2.7, 0.6, 0.1], v16: [0.1, 201, 1, 0.4, 0],
+            v17: [0, 199, 1, 0.3, 0], v18: [0.2, 138, 0.8, 0.5, 0.1], v19: [0.6, 337, 1.7, 0.4, 0.1], v20: [0, 380, 1.6, 1.1, 0],
+            v21: [0.1, 120, 0.5, 0.3, 0], v22: [1.8, 23, 1, 0, 0.1], v23: [2.4, 40, 1.3, 0, 0], v24: [6.6, 38, 2.5, 0, 0.1],
+            v25: [6.6, 38, 2.5, 0, 0.1], v26: [1.8, 40, 0.8, 0, 0.1], v27: [2.6, 25, 0.9, 0, 0.1], v28: [0.8, 14, 0.4, 0, 0.2],
+            v29: [2.5, 27, 2, 0, 0.3], v30: [1.7, 21, 1.5, 0, 0], v31: [1.7, 21, 1.5, 0, 0], v32: [2.8, 31, 2, 0, 0.2],
+            v33: [0.3, 16, 0.8, 0, 0], v34: [1.1, 6, 1.4, 0, 0], v35: [1.2, 10, 1.5, 0, 0], v36: [2.4, 18, 1.9, 0, 0.1],
+            v37: [1, 57, 0.5, 0, 0], v38: [1.9, 31, 0.6, 0, 0], v39: [2, 26, 0.5, 0, 0], v40: [0.7, 10, 0.6, 0, 0],
+            v41: [1.6, 152, 1.2, 0, 0], v42: [0.6, 41, 0.5, 0, 0], v43: [0.4, 2, 0.5, 0, 0], v44: [1.6, 59, 0.3, 0, 0.1],
+            v45: [0.6, 102, 0.2, 0, 0.2], v46: [1, 62, 0.7, 0, 0.2], v47: [0.6, 14, 0.3, 0, 0], v48: [0.7, 32, 0.6, 0, 0.2],
+            v49: [0.3, 17, 0.2, 0, 0], v50: [0.4, 6, 0.9, 0, 0], v51: [1.2, 31, 0.8, 0, 0], v52: [0.4, 15, 0.3, 0, 0],
+            v53: [0.5, 10, 0.5, 0, 0.1], v54: [0.3, 6, 0.2, 0, 0], v55: [0.4, 9, 0.2, 0, 0.1], v56: [0.6, 24, 0.2, 0, 0.1],
+            v57: [0.2, 11, 0.1, 0, 0], v58: [0.4, 27, 0.1, 0, 0], v59: [0.2, 18, 0.1, 0, 0], v60: [0.9, 76, 0.5, 0, 2.1],
+            v61: [1.6, 14, 2, 0, 1.7], v62: [0.4, 18, 0.3, 0, 1.6], v63: [1, 75, 0.9, 0, 0], v64: [0.8, 27, 0.9, 0, 2.5],
+            v65: [1.4, 7, 1.2, 0, 0], v66: [0.3, 8, 0.4, 0, 0], v67: [0.6, 56, 0.5, 0, 0], v68: [0.1, 0, 0, 0, 0.1],
+            v69: [0, 0, 0, 0, 0.1], v70: [2.4, 15, 0.7, 0.1, 0], v71: [2.3, 40, 1.3, 0, 0.1], v72: [4.5, 350, 2.5, 2.4, 0.8],
+            v73: [5.5, 60, 2.3, 0, 0.1], v74: [3.8, 210, 2.6, 0.5, 0.2], v75: [2.5, 320, 1.6, 1, 4.4], v76: [4.8, 120, 3.1, 0, 0.4],
+            v77: [4.1, 64, 1.8, 0, 0.1], v78: [4, 100, 2, 0, 0.1], v79: [3.1, 41, 1.9, 0, 1], v80: [2.3, 250, 2.8, 0.9, 0.1],
+            v81: [1, 510, 2.2, 1.1, 0.1], v82: [1.8, 50, 1.1, 0, 0.3], v83: [4, 120, 1.2, 0, 0.1], v84: [4.2, 170, 5.5, 3.1, 0],
+            v85: [1.5, 60, 0.6, 0, 0.1], v86: [1.6, 40, 0.6, 0, 0.4], v87: [2.6, 10, 0.5, 3.1, 0.2], v88: [2.1, 150, 1.3, 0, 0.5],
+            v89: [1, 470, 0.3, 2.4, 0.3], v90: [0.3, 350, 0.2, 0.4, 0.4], v91: [0.4, 470, 0.1, 1.1, 0], v92: [0, 293, 1.2, 1.3, 0],
+            v93: [0.1, 276, 0.9, 1.1, 0.2], v94: [0.1, 196, 1, 0.9, 0], v95: [0.1, 150, 0.8, 1.2, 0], v96: [0.1, 312, 1.1, 0.7, 0],
+            v97: [0.1, 195, 1, 0.5, 0], v98: [0, 85, 0.4, 0.1, 0], v99: [0, 28, 0.1, 0.1, 0], v100: [0, 26, 0.1, 0, 0],
+            v101: [0, 3, 0, 0, 0], v102: [0.6, 25, 0.5, 0.55, 0], v103: [2, 42, 0.9, 0, 0.2], v104: [3.3, 81, 1.2, 0, 0.1],
+            v105: [2.2, 21, 1.1, 0, 0.1], v106: [4, 40, 1.6, 0, 0.1], v107: [3, 17, 1.6, 0, 0.1], v108: [1.8, 10, 0.7, 0, 0],
+            v109: [3.7, 100, 0.9, 0, 0], v110: [1.6, 175, 1, 0, 0], v111: [0.8, 52, 0.6, 0, 0], v112: [2, 10, 1, 0, 0],
+            v113: [2.9, 64, 0.9, 0.1, 0.2], v114: [2.4, 118, 0.4, 0, 0.3], v115: [0.6, 13, 0.4, 0, 0], v116: [2.1, 17, 1.3, 0, 0],
+            v117: [0.5, 5, 0.1, 0, 0], v118: [0.4, 12, 0.2, 0, 0], v119: [1.7, 28, 1.4, 0, 0.3], v120: [12.6, 130, 2.2, 0.5, 0],
+            v121: [0.3, 2, 0.5, 0, 0], v122: [2, 183, 0.7, 0.2, 0.6], v123: [3.6, 260, 0.6, 0.2, 0.2], v124: [0.4, 20, 0.2, 0, 0.2],
+            v125: [0.9, 32, 0.2, 0, 0], v126: [0.8, 55, 0.3, 0, 0.1], v127: [1.9, 56, 0.5, 0, 0.3], v128: [0.9, 31, 0.2, 0, 0.1],
+            v129: [1.2, 19, 0.5, 0, 0], v130: [0.2, 6, 0.1, 0, 0], v131: [1.2, 84, 0.3, 0, 0], v132: [0.7, 14, 0.3, 0, 0],
+            v133: [0.2, 60, 0.1, 0, 0], v134: [0.3, 18, 0.1, 0, 0.1], v135: [0.5, 15, 0.1, 0, 0], v136: [0.5, 21, 0.2, 0, 0],
+            v137: [0.4, 11, 0.2, 0, 0], v138: [0.8, 31, 0.5, 0, 0.2], v139: [0.3, 16, 0.1, 0, 0], v140: [0.4, 31, 0.2, 0, 0],
+            v141: [0.8, 27, 0.4, 0, 0.1], v142: [1.7, 13, 1.6, 0, 0], v143: [1.1, 29, 0.6, 0, 0.1], v144: [0.4, 16, 0.8, 0, 0],
+            v145: [1.1, 20, 1.5, 0, 0], v146: [1.3, 64, 0.7, 0, 0.1], v147: [0, 0, 0, 0, 0], v148: [0.2, 4, 0.2, 0, 0],
+            v149: [2.7, 201, 1.4, 0.4, 0.2], v150: [2.8, 212, 1.5, 0.5, 0.2], v151: [4.7, 248, 1.7, 0.3, 0.7], v152: [7.3, 346, 4.7, 0.4, 0.6],
+            v153: [2.9, 488, 2.4, 0.6, 0.3], v154: [2.5, 152, 1.9, 0.1, 0.6], v155: [2.1, 340, 2.2, 0.5, 0.2], v156: [1.9, 670, 3.7, 0.9, 0.2],
+            v157: [3.1, 50, 1.1, 0, 0.1], v158: [2.2, 441, 2.2, 0.4, 0.4], v159: [2.3, 128, 1.2, 0, 0.1], v160: [4.5, 400, 3, 1.4, 0.3],
+            v161: [1.4, 33, 2.1, 0.1, 0.4], v162: [2.8, 231, 1.5, 0, 1.1], v163: [4.5, 95, 2.3, 0, 0.2], v164: [4, 410, 1.9, 0.5, 0.2],
+            v165: [0.5, 15, 0.7, 0, 0], v166: [3.7, 110, 1.6, 0.9, 0.2], v167: [3.6, 262, 3, 1.8, 0.2], v168: [1.7, 47, 0.9, 0, 0.1],
+            v169: [4.9, 61, 2, 0, 0.1], v170: [4.6, 160, 1.6, 0, 0.6], v171: [3.2, 280, 2, 0.7, 0.1], v172: [1.5, 80, 1.2, 0, 0.1],
+            v173: [3, 150, 2, 0, 0.1], v174: [0.6, 25, 0.4, 0.1, 0.1], v175: [0.8, 30, 0.9, 0, 0.1], v176: [0.8, 2, 0.7, 0, 0],
+            v177: [0.4, 30, 0.4, 0, 0.1], v178: [0.1, 7, 0.1, 0, 0], v179: [0.9, 10, 0.7, 0, 0.2], v180: [1.3, 8, 0.3, 0, 0],
+            v181: [0.8, 27, 0.2, 0, 0], v182: [1.7, 7, 0.2, 0, 0.3], v183: [0.1, 84, 0.5, 0.3, 0.1], v184: [0.1, 1, 0, 0, 0],
+            v185: [0, 40, 0.6, 0, 0], v186: [0.1, 4, 0, 0, 0], v187: [0.5, 27, 0.1, 0, 0], v188: [0.6, 530, 0.3, 1.9, 1],
+            v189: [0.2, 450, 1.8, 2, 0], v190: [0, 5, 0, 0, 0], v191: [0.9, 383, 1.8, 1.4, 0.1]
+        };
+        DEFAULT_FOOD_DB.forEach(food => {
+            const values = MICRO_DB[food.id];
+            if (values) food.micros = Object.fromEntries(MICRO_KEYS.map((key, i) => [key, values[i]]));
+        });
+
         const MEAL_SLOTS = [
             { key: 'breakfast', title: 'Breakfast', icon: '🌅', subtitle: 'Plant & vegetarian fuel to start your day' },
             { key: 'lunch', title: 'Lunch', icon: '☀️', subtitle: 'Complex carbs, high-protein grains & meal prep' },
@@ -1648,7 +1780,8 @@
                 customFoods: [],
                 activeCategory: 'All',
                 weighIns: [],
-                onboarded: false
+                onboarded: false,
+                microsEnabled: false
             };
         }
 
@@ -2115,7 +2248,22 @@
 
         function toggleMoreMenu(event) {
             if (event) event.stopPropagation();
-            document.getElementById('more-menu').classList.toggle('hidden');
+            const menu = document.getElementById('more-menu');
+            if (!menu.classList.contains('hidden')) {
+                closeMoreMenu();
+                return;
+            }
+            const anchor = event?.currentTarget;
+            const fromBottomBar = !anchor || Boolean(anchor.closest('#bottom-nav'));
+            menu.classList.toggle('is-sheet', fromBottomBar);
+            if (fromBottomBar) {
+                menu.style.top = menu.style.right = '';
+            } else {
+                const rect = anchor.getBoundingClientRect();
+                menu.style.top = `${rect.bottom + 8}px`;
+                menu.style.right = `${document.documentElement.clientWidth - rect.right}px`;
+            }
+            menu.classList.remove('hidden');
         }
 
         function closeMoreMenu() {
@@ -2126,6 +2274,8 @@
             const menu = document.getElementById('more-menu');
             if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target)) closeMoreMenu();
         });
+
+        window.addEventListener('resize', closeMoreMenu);
 
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
@@ -2259,6 +2409,7 @@
                 c: sum('baseC'),
                 f: sum('baseF'),
                 fiber: sum('baseFiber'),
+                micros: sumEntryMicros(items),
                 icon: matchFoodEmoji(name) || items[0].icon || '🍱',
                 addedAt: Date.now(),
                 components: items.map(i => ({ name: i.name, servings: i.servings }))
@@ -2305,7 +2456,7 @@
                     <div class="flex flex-wrap gap-2">
                         ${picks.map(f => `
                             <button onclick="quickAddFood('${f.id}', getActiveMealSlot())" class="quick-chip" title="${escapeHtml(f.name)} • ${escapeHtml(f.servingDesc)}">
-                                <span class="text-base">${f.icon || '🌱'}</span>
+                                <span class="text-base">${escapeHtml(f.icon || '🌱')}</span>
                                 <span>${escapeHtml(shortFoodName(f.name))}</span>
                                 <span class="text-slate-400 font-medium">${f.cal}</span>
                             </button>`).join('')}
@@ -3085,7 +3236,8 @@
                                 p: entry.baseP,
                                 c: entry.baseC,
                                 f: entry.baseF,
-                                fiber: entry.baseFiber
+                                fiber: entry.baseFiber,
+                                micros: entry.baseMicros
                             };
                             recentOnlyFoods.set(food.id, food);
                         }
@@ -3122,6 +3274,7 @@
                 baseC: food.c,
                 baseF: food.f,
                 baseFiber: food.fiber || 0,
+                ...(food.micros && !BUILTIN_MICROS.has(food.id) ? { baseMicros: food.micros } : {}),
                 servings: Number(servings)
             };
         }
@@ -3390,6 +3543,111 @@
             };
         }
 
+        const MICRO_INFO = {
+            fe: { label: 'Iron', unit: 'mg', bar: 'bg-rose-500' },
+            ca: { label: 'Calcium', unit: 'mg', bar: 'bg-sky-500' },
+            zn: { label: 'Zinc', unit: 'mg', bar: 'bg-amber-500' },
+            b12: { label: 'Vitamin B12', unit: 'µg', bar: 'bg-violet-500' },
+            o3: { label: 'Omega-3', unit: 'g', bar: 'bg-teal-500' }
+        };
+
+        // Adult RDAs/AIs from NIH ODS. Iron is 1.8× for vegetarians (Institute of Medicine).
+        function getMicroTargets() {
+            const female = state.profile.sex === 'female';
+            const age = Number(state.profile.age) || 30;
+            return {
+                fe: Math.round((female && age <= 50 ? 18 : 8) * 1.8),
+                ca: (female && age > 50) || age > 70 ? 1200 : 1000,
+                zn: female ? 8 : 11,
+                b12: 2.4,
+                o3: female ? 1.1 : 1.6
+            };
+        }
+
+        const BUILTIN_MICROS = new Map(DEFAULT_FOOD_DB.filter(f => f.micros).map(f => [f.id, f.micros]));
+
+        // Built-in foods resolve from MICRO_DB so older log entries get values too.
+        function getEntryMicros(item) {
+            return item.baseMicros
+                || BUILTIN_MICROS.get(item.foodId)
+                || state.customFoods.find(f => f.id === item.foodId)?.micros
+                || null;
+        }
+
+        function sumEntryMicros(items) {
+            const all = items.map(getEntryMicros);
+            if (!all.length || all.some(m => !m)) return null;
+            return Object.fromEntries(MICRO_KEYS.map(key => [key,
+                Math.round(all.reduce((t, m, i) => t + (Number(m[key]) || 0) * (Number(items[i].servings) || 0), 0) * 10) / 10
+            ]));
+        }
+
+        function getDailyMicroTotals() {
+            const totals = Object.fromEntries(MICRO_KEYS.map(key => [key, 0]));
+            let items = 0, missing = 0;
+            Object.values(state.meals).forEach(list => list.forEach(item => {
+                items++;
+                const micros = getEntryMicros(item);
+                if (!micros) {
+                    missing++;
+                    return;
+                }
+                const mult = Number(item.servings) || 0;
+                MICRO_KEYS.forEach(key => { totals[key] += (Number(micros[key]) || 0) * mult; });
+            }));
+            return { totals, items, missing };
+        }
+
+        function readMicroInputs(prefix) {
+            const raw = MICRO_KEYS.map(key => document.getElementById(`${prefix}-${key}`).value.trim());
+            if (raw.every(v => v === '')) return null;
+            return Object.fromEntries(MICRO_KEYS.map((key, i) => [key, Math.max(0, Number(raw[i]) || 0)]));
+        }
+
+        function fillMicroInputs(prefix, micros) {
+            MICRO_KEYS.forEach(key => {
+                const value = Number(micros?.[key]);
+                document.getElementById(`${prefix}-${key}`).value = micros?.[key] == null || !Number.isFinite(value) ? '' : Math.max(0, Math.round(value * 10) / 10);
+            });
+        }
+
+        function formatMicro(value) {
+            return value >= 10 ? Math.round(value).toLocaleString() : (Math.round(value * 10) / 10).toString();
+        }
+
+        function toggleMicros() {
+            state.microsEnabled = !state.microsEnabled;
+            recalculateAndRender();
+            showToast(state.microsEnabled ? 'Micronutrient tracking on' : 'Micronutrient tracking off');
+        }
+
+        function renderMicros() {
+            const enabled = Boolean(state.microsEnabled);
+            document.querySelectorAll('[data-micros]').forEach(el => el.classList.toggle('hidden', !enabled));
+            document.getElementById('micros-menu-label').textContent = `Micronutrients: ${enabled ? 'On' : 'Off'}`;
+            if (!enabled) return;
+
+            const targets = getMicroTargets();
+            const { totals, items, missing } = getDailyMicroTotals();
+            document.getElementById('micros-list').innerHTML = MICRO_KEYS.map(key => {
+                const info = MICRO_INFO[key];
+                const pct = Math.min(100, Math.round((totals[key] / targets[key]) * 100));
+                return `
+                    <div>
+                        <div class="flex items-baseline justify-between text-[11px]">
+                            <span class="font-bold text-slate-700">${info.label}</span>
+                            <span class="text-slate-400"><span class="font-extrabold text-slate-800">${formatMicro(totals[key])}</span> / ${formatMicro(targets[key])} ${info.unit}</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-0.5">
+                            <div class="h-full ${info.bar} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
+            }).join('');
+            document.getElementById('micros-coverage').textContent = missing
+                ? `${missing} of ${items} item${items === 1 ? '' : 's'} missing data`
+                : '';
+        }
+
         function renderTargetsAndDashboard() {
             const t = state.targets;
             const consumed = getDailyConsumedTotals();
@@ -3450,6 +3708,7 @@
             document.getElementById('water-liters-label').textContent = `${state.waterCups} / 8 cups (${liters}L)`;
 
             renderSmartFinisher(consumed, t);
+            renderMicros();
         }
 
         function updateMacroBar(key, consumedVal, targetVal) {
@@ -3562,11 +3821,11 @@
             container.innerHTML = visible.map(({ food, reason }) => `
                 <div class="p-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="text-lg shrink-0">${food.icon || '🌱'}</span>
+                        <span class="text-lg shrink-0">${escapeHtml(food.icon || '🌱')}</span>
                         <div class="min-w-0">
-                            <div class="text-xs font-bold text-white truncate">${food.name}</div>
+                            <div class="text-xs font-bold text-white truncate">${escapeHtml(food.name)}</div>
                             <div class="text-[11px] text-emerald-200/90 flex items-center gap-2">
-                                <span>${food.servingDesc} • ${food.cal} kcal</span>
+                                <span>${escapeHtml(food.servingDesc)} • ${food.cal} kcal</span>
                                 <span class="px-1.5 py-0.2 rounded bg-emerald-400/20 text-emerald-300 font-semibold text-[10px]">${reason}</span>
                             </div>
                         </div>
@@ -3638,11 +3897,11 @@
             listEl.innerHTML = filtered.map(food => `
                 <div class="p-2.5 hover:bg-white transition flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="w-8 h-8 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-base shrink-0 shadow-2xs">${food.icon || '🌱'}</span>
+                        <span class="w-8 h-8 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-base shrink-0 shadow-2xs">${escapeHtml(food.icon || '🌱')}</span>
                         <div class="min-w-0">
-                            <div class="text-xs font-bold text-slate-800 truncate">${food.name}</div>
+                            <div class="text-xs font-bold text-slate-800 truncate">${escapeHtml(food.name)}</div>
                             <div class="text-[11px] text-slate-500 flex flex-wrap items-center gap-x-2">
-                                <span class="font-medium text-slate-600">${food.servingDesc}</span>
+                                <span class="font-medium text-slate-600">${escapeHtml(food.servingDesc)}</span>
                                 <span>•</span>
                                 <span class="font-bold text-emerald-700">${food.cal} kcal</span>
                                 <span class="text-rose-600 font-semibold">${food.p}P</span>
@@ -3721,11 +3980,11 @@
                             return `
                                 <div class="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-slate-50/70 transition">
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <span class="text-lg shrink-0">${item.icon || '🌱'}</span>
+                                        <span class="text-lg shrink-0">${escapeHtml(item.icon || '🌱')}</span>
                                         <div class="min-w-0">
-                                            <div class="text-xs sm:text-sm font-bold text-slate-800 truncate">${item.name}</div>
+                                            <div class="text-xs sm:text-sm font-bold text-slate-800 truncate">${escapeHtml(item.name)}</div>
                                             <div class="text-[11px] text-slate-500 flex flex-wrap items-center gap-x-2">
-                                                <span>${item.servingDesc} (~${itemGrams}g)</span>
+                                                <span>${escapeHtml(item.servingDesc)} (~${itemGrams}g)</span>
                                                 <span>•</span>
                                                 <span class="font-bold text-slate-800">${itemCal} kcal</span>
                                                 <span class="text-rose-600 font-semibold">${itemP}g P</span>
@@ -4144,6 +4403,7 @@
             const saveToDb = document.getElementById('cf-save-db').checked;
             const category = document.getElementById('cf-category').value || 'MealPrep';
             const icon = document.getElementById('cf-emoji').value.trim() || suggestFoodEmoji(name, category);
+            const micros = readMicroInputs('cf');
             const now = Date.now();
 
             const newFoodId = 'cust_' + now;
@@ -4159,6 +4419,7 @@
                 f,
                 fiber,
                 icon,
+                ...(micros ? { micros } : {}),
                 addedAt: now
             };
 
@@ -4179,6 +4440,7 @@
                 baseC: c,
                 baseF: f,
                 baseFiber: fiber,
+                ...(micros ? { baseMicros: micros } : {}),
                 servings: 1
             });
 
@@ -4518,6 +4780,9 @@
             document.getElementById('scan-res-c').value = Number(data.c || 0).toFixed(1).replace(/\.0$/, '');
             document.getElementById('scan-res-f').value = Number(data.f || 0).toFixed(1).replace(/\.0$/, '');
             document.getElementById('scan-res-fiber').value = Number(data.fiber || 0).toFixed(1).replace(/\.0$/, '');
+            fillMicroInputs('scan-res', {
+                fe: data.iron, ca: data.calcium, zn: data.zinc, b12: data.b12, o3: data.omega3
+            });
             document.getElementById('scan-res-servings-to-log').value = 1;
             document.getElementById('scan-res-save-catalog').checked = true;
 
@@ -4561,6 +4826,7 @@
             const servingsToLog = Number(document.getElementById('scan-res-servings-to-log').value) || 1;
             const saveToCatalog = document.getElementById('scan-res-save-catalog').checked;
             const icon = document.getElementById('scan-res-emoji').value.trim() || suggestFoodEmoji(name, category);
+            const micros = readMicroInputs('scan-res');
             const now = Date.now();
 
             const newFoodId = 'scanned_' + now;
@@ -4576,6 +4842,7 @@
                 f: f,
                 fiber: fiber,
                 icon,
+                ...(micros ? { micros } : {}),
                 addedAt: now
             };
 
@@ -4597,6 +4864,7 @@
                     baseC: c,
                     baseF: f,
                     baseFiber: fiber,
+                    ...(micros ? { baseMicros: micros } : {}),
                     servings: servingsToLog
                 });
             }
