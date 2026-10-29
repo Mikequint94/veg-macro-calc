@@ -1924,8 +1924,15 @@
         }
         let cloudUser = null;
         let cloudPushTimer = null;
-        let cloudBusy = false;
+        let cloudRetryTimer = null;
+        let syncInFlight = null;   // promise for the sync that is running
+        let syncAgain = false;     // another sync was requested while one was running
+        let applyingCloudState = false;
         let lastPayloadJson = null;
+
+        const SYNC_BASE_KEY = 'nutripulse_sync_base';
+        const CLOUD_POLL_MS = 60000;
+        const CLOUD_RETRY_MS = 15000;
 
         function loadSyncMeta() {
             try {
@@ -1952,7 +1959,7 @@
         }
 
         function markCloudDirtyIfChanged() {
-            if (lastPayloadJson === null) return;
+            if (lastPayloadJson === null || applyingCloudState) return;
             const json = JSON.stringify(getSyncPayload());
             if (json === lastPayloadJson) return;
             lastPayloadJson = json;
@@ -1962,90 +1969,192 @@
             scheduleCloudPush();
         }
 
-        function scheduleCloudPush() {
+        function scheduleCloudPush(delay = CLOUD_PUSH_DEBOUNCE_MS) {
             if (!cloudUser) return;
             clearTimeout(cloudPushTimer);
             setCloudStatus('pending');
-            cloudPushTimer = setTimeout(pushToCloud, CLOUD_PUSH_DEBOUNCE_MS);
+            cloudPushTimer = setTimeout(requestSync, delay);
         }
 
-        async function pushToCloud() {
-            if (!supabaseClient || !cloudUser) return;
-            clearTimeout(cloudPushTimer);
-            const pushedJson = JSON.stringify(getSyncPayload());
-            setCloudStatus('syncing');
-            const { data, error } = await supabaseClient
-                .from('user_state')
-                .upsert({ user_id: cloudUser.id, state: JSON.parse(pushedJson), updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
-                .select('updated_at')
-                .single();
-            if (error) {
-                console.error('Cloud push failed:', error);
-                setCloudStatus('error', error.message);
-                return;
-            }
-            syncMeta.lastSyncedAt = data.updated_at;
-            syncMeta.dirty = JSON.stringify(getSyncPayload()) !== pushedJson;
-            saveSyncMeta();
-            if (syncMeta.dirty) scheduleCloudPush();
-            else setCloudStatus('synced');
+        /* Three-way merge. The "base" is a fingerprint of the state this device and the cloud last agreed on,
+           so every difference can be attributed: changed only here → keep ours; changed only in the cloud →
+           take theirs; deleted on one side and untouched on the other → delete. Neither side ever replaces
+           the other wholesale. */
+        function hashValue(value) {
+            const str = JSON.stringify(value);
+            let h = 5381;
+            for (let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+            return h.toString(36) + '.' + str.length.toString(36);
         }
 
-        function applyCloudState(remoteState, updatedAt) {
-            hydrateState({ ...remoteState, activeDate: state.activeDate });
-            resetPayloadBaseline();
-            syncMeta.dirty = false;
-            syncMeta.lastSyncedAt = updatedAt;
-            saveSyncMeta();
-            syncInputsFromState();
-            syncDateBarUI();
-            recalculateAndRender();
+        const SYNCED_SETTINGS = ['unitSystem', 'onboarded', 'microsEnabled'];
+
+        // Flattens a synced state into keyed records: one per logged food, day's water, custom food, weigh-in and setting.
+        function toSyncRecords(payload) {
+            const records = {};
+            Object.entries(payload?.logsByDate || {}).forEach(([date, day]) => {
+                Object.entries(day?.meals || {}).forEach(([slot, entries]) => {
+                    (entries || []).forEach(entry => { records[`e:${entry.uid}`] = { date, slot, entry }; });
+                });
+                if (Number(day?.waterCups)) records[`w:${date}`] = { waterCups: Number(day.waterCups) };
+            });
+            (payload?.customFoods || []).forEach(food => { records[`f:${food.id}`] = food; });
+            (payload?.weighIns || []).forEach(w => { records[`k:${w.date}`] = w; });
+            Object.entries(payload?.profile || {}).forEach(([key, value]) => { records[`p:${key}`] = { value }; });
+            SYNCED_SETTINGS.forEach(key => { if (payload?.[key] !== undefined) records[`s:${key}`] = { value: payload[key] }; });
+            return records;
         }
 
-        async function pullFromCloud() {
-            if (!supabaseClient || !cloudUser || cloudBusy) return;
-            cloudBusy = true;
-            setCloudStatus('syncing');
+        function fromSyncRecords(records, local, remote) {
+            const out = { ...remote, ...local, logsByDate: {}, customFoods: [], weighIns: [], profile: {} };
+            const dayFor = date => (out.logsByDate[date] ||= { meals: createEmptyMeals(), waterCups: 0 });
+            Object.entries(records).forEach(([key, rec]) => {
+                const id = key.slice(2);
+                if (key.startsWith('e:')) (dayFor(rec.date).meals[rec.slot] ||= []).push(rec.entry);
+                else if (key.startsWith('w:')) dayFor(id).waterCups = rec.waterCups;
+                else if (key.startsWith('f:')) out.customFoods.push(rec);
+                else if (key.startsWith('k:')) out.weighIns.push(rec);
+                else if (key.startsWith('p:')) out.profile[id] = rec.value;
+                else if (key.startsWith('s:')) out[id] = rec.value;
+            });
+            const entryTime = e => e.addedAt || getTimestampFromId(e.uid);
+            Object.values(out.logsByDate).forEach(day => Object.values(day.meals).forEach(list => list.sort((a, b) => entryTime(a) - entryTime(b))));
+            out.customFoods.sort((a, b) => (b.addedAt || getTimestampFromId(b.id)) - (a.addedAt || getTimestampFromId(a.id)));
+            out.weighIns.sort((a, b) => a.date.localeCompare(b.date));
+            return out;
+        }
+
+        function fingerprint(payload) {
+            return Object.fromEntries(Object.entries(toSyncRecords(payload)).map(([key, rec]) => [key, hashValue(rec)]));
+        }
+
+        function sameFingerprint(a, b) {
+            const keys = Object.keys(a);
+            return keys.length === Object.keys(b).length && keys.every(key => a[key] === b[key]);
+        }
+
+        function loadSyncBase() {
             try {
+                return JSON.parse(localStorage.getItem(SYNC_BASE_KEY) || 'null');
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // With no base (first sync on this device) nothing can be treated as deleted, so everything is kept,
+        // and where both sides set the same setting differently the account's existing value wins.
+        function mergeSyncStates(base, local, remote) {
+            const mine = toSyncRecords(local);
+            const theirs = toSyncRecords(remote);
+            const merged = {};
+            new Set([...Object.keys(mine), ...Object.keys(theirs)]).forEach(key => {
+                const ours = mine[key], cloud = theirs[key], was = base?.[key];
+                const ourHash = ours && hashValue(ours), cloudHash = cloud && hashValue(cloud);
+                if (ours && cloud) {
+                    if (ourHash === cloudHash || cloudHash === was) merged[key] = ours;
+                    else if (ourHash === was) merged[key] = cloud;
+                    else merged[key] = !base && /^[ps]:/.test(key) ? cloud : ours;
+                } else if (ours) {
+                    if (was === undefined || ourHash !== was) merged[key] = ours; // new here, or edited here after the cloud deleted it
+                } else if (was === undefined || cloudHash !== was) {
+                    merged[key] = cloud;
+                }
+            });
+            return fromSyncRecords(merged, local, remote);
+        }
+
+        function applyCloudState(nextState) {
+            applyingCloudState = true;
+            try {
+                hydrateState({ ...nextState, activeDate: state.activeDate });
+                syncInputsFromState();
+                syncDateBarUI();
+                recalculateAndRender();
+            } finally {
+                applyingCloudState = false;
+            }
+            resetPayloadBaseline();
+        }
+
+        // Runs one sync at a time; requests that arrive mid-sync trigger one more pass afterwards.
+        function requestSync() {
+            if (!supabaseClient || !cloudUser) return Promise.resolve();
+            if (syncInFlight) {
+                syncAgain = true;
+                return syncInFlight;
+            }
+            clearTimeout(cloudPushTimer);
+            clearTimeout(cloudRetryTimer);
+            syncInFlight = (async () => {
+                try {
+                    do {
+                        syncAgain = false;
+                        await syncOnce();
+                    } while (syncAgain);
+                } catch (err) {
+                    console.error('Cloud sync failed:', err);
+                    setCloudStatus('error', err.message || String(err));
+                    cloudRetryTimer = setTimeout(requestSync, CLOUD_RETRY_MS);
+                } finally {
+                    syncInFlight = null;
+                }
+            })();
+            return syncInFlight;
+        }
+
+        // Read the cloud copy, merge in anything unsynced from this device, and write back only if the cloud
+        // copy is still the one that was read. If another device wrote in between, read and merge again.
+        async function syncOnce() {
+            setCloudStatus('syncing');
+            for (let attempt = 0; attempt < 5; attempt++) {
                 const { data: row, error } = await supabaseClient
                     .from('user_state')
                     .select('state, updated_at')
                     .eq('user_id', cloudUser.id)
                     .maybeSingle();
                 if (error) throw error;
-
-                if (!row) {
-                    await pushToCloud();
-                } else if (!syncMeta.lastSyncedAt) {
-                    const useCloud = window.confirm(
-                        'Your account already has saved data.\n\nOK: load your account data on this device (replaces what is here now).\nCancel: keep this device\'s data and overwrite your account data.'
-                    );
-                    if (useCloud) {
-                        applyCloudState(row.state, row.updated_at);
-                        setCloudStatus('synced');
-                        showToast('Loaded your data from the cloud');
-                    } else {
-                        await pushToCloud();
-                    }
-                } else if (row.updated_at !== syncMeta.lastSyncedAt) {
-                    const localIsNewer = syncMeta.dirty && syncMeta.localChangedAt && Date.parse(syncMeta.localChangedAt) > Date.parse(row.updated_at);
-                    if (localIsNewer) {
-                        await pushToCloud();
-                    } else {
-                        applyCloudState(row.state, row.updated_at);
-                        setCloudStatus('synced');
-                    }
-                } else if (syncMeta.dirty) {
-                    await pushToCloud();
-                } else {
+                if (row && row.updated_at === syncMeta.lastSyncedAt && !syncMeta.dirty) {
                     setCloudStatus('synced');
+                    return;
                 }
-            } catch (err) {
-                console.error('Cloud pull failed:', err);
-                setCloudStatus('error', err.message);
-            } finally {
-                cloudBusy = false;
+
+                const local = getSyncPayload();
+                const next = row ? mergeSyncStates(syncMeta.lastSyncedAt ? loadSyncBase() : null, local, row.state) : local;
+                if (!sameFingerprint(fingerprint(next), fingerprint(local))) applyCloudState(next);
+                const syncedJson = JSON.stringify(getSyncPayload());
+
+                if (row && sameFingerprint(fingerprint(next), fingerprint(row.state))) {
+                    finishSync(row.updated_at, next, syncedJson);
+                    return;
+                }
+
+                const updatedAt = new Date().toISOString();
+                const write = row
+                    ? supabaseClient.from('user_state')
+                        .update({ state: next, updated_at: updatedAt })
+                        .eq('user_id', cloudUser.id)
+                        .eq('updated_at', row.updated_at)
+                    : supabaseClient.from('user_state')
+                        .insert({ user_id: cloudUser.id, state: next, updated_at: updatedAt });
+                const { data: written, error: writeError } = await write.select('updated_at').maybeSingle();
+                if (writeError && writeError.code !== '23505') throw writeError;
+                if (written) {
+                    finishSync(written.updated_at, next, syncedJson);
+                    return;
+                }
+                // Another device saved first; loop to merge with its version.
             }
+            throw new Error('Another device kept saving at the same time');
+        }
+
+        function finishSync(updatedAt, syncedState, syncedJson) {
+            syncMeta.lastSyncedAt = updatedAt;
+            localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(fingerprint(syncedState)));
+            // Anything edited while the request was in flight is still unsynced.
+            syncMeta.dirty = JSON.stringify(getSyncPayload()) !== syncedJson;
+            saveSyncMeta();
+            if (syncMeta.dirty) scheduleCloudPush();
+            else setCloudStatus('synced');
         }
 
         function setCloudStatus(status, detail = '') {
@@ -2117,15 +2226,15 @@
         }
 
         async function syncNow() {
-            if (syncMeta.dirty) await pushToCloud();
-            else await pullFromCloud();
+            await requestSync();
         }
 
         async function signOutOfSync() {
-            if (syncMeta.dirty) await pushToCloud();
+            await requestSync();
             await supabaseClient.auth.signOut();
             syncMeta = { dirty: false, lastSyncedAt: null, localChangedAt: null };
             saveSyncMeta();
+            localStorage.removeItem(SYNC_BASE_KEY);
             closeSyncModal();
             showToast('Signed out. Your data is still saved on this device.');
         }
@@ -2143,14 +2252,25 @@
                     return;
                 }
                 // Supabase warns against awaiting its own calls inside this callback.
-                if (!wasSignedIn) setTimeout(pullFromCloud, 0);
+                if (!wasSignedIn) setTimeout(requestSync, 0);
             });
 
+            // Check in whenever the app comes back into view or back online, push before it goes away,
+            // and poll while it stays open so another device's changes show up without a reload.
             document.addEventListener('visibilitychange', () => {
                 if (!cloudUser) return;
-                if (document.visibilityState === 'visible') pullFromCloud();
-                else if (syncMeta.dirty) pushToCloud();
+                if (document.visibilityState === 'visible') requestSync();
+                else if (syncMeta.dirty) requestSync();
             });
+            window.addEventListener('pagehide', () => {
+                if (cloudUser && syncMeta.dirty) requestSync();
+            });
+            window.addEventListener('online', () => {
+                if (cloudUser) requestSync();
+            });
+            setInterval(() => {
+                if (cloudUser && document.visibilityState === 'visible') requestSync();
+            }, CLOUD_POLL_MS);
         }
 
         /**************************************************************
