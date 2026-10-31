@@ -14,7 +14,7 @@ const MAX_IMAGE_BASE64_CHARS = 4_000_000; // about 3 MB of image
 const MAX_DESCRIPTION_CHARS = 1000;
 const MAX_HINT_CHARS = 120;
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const CATEGORIES = ['PlantPro', 'DairyEggs', 'Legumes', 'Grains', 'Produce', 'FatsSeeds', 'MealPrep', 'Snacks'];
+const CATEGORIES = ['PlantPro', 'DairyEggs', 'Legumes', 'Grains', 'Produce', 'FatsSeeds', 'MealPrep', 'Snacks', 'Shakes'];
 
 const RESPONSE_SCHEMA = {
     type: 'OBJECT',
@@ -56,7 +56,7 @@ Strictly return a valid JSON object matching the requested schema:
 - "omega3": Total omega-3 fats (ALA + EPA + DHA) in grams per serving (number). ${isDescribe ? 'Estimate.' : 'Omit if not listed.'}
 - "isVegetarian": Boolean (true if meatless/vegetarian; false if meat, poultry, fish, gelatin, lard, or slaughter animal products are detected).
 - "vegetarianNote": Concise explanation of vegetarian status${isDescribe ? ', plus a brief note on the main assumptions behind the estimate (portion size, cooking oil, etc.)' : ' (e.g. "100% vegetarian friendly", or highlight any flagged non-vegetarian ingredients)'}.
-- "suggestedCategory": One of ${JSON.stringify(CATEGORIES)} ("Snacks" covers snacks, sweets, and drinks).
+- "suggestedCategory": One of ${JSON.stringify(CATEGORIES)} ("Shakes" covers protein shakes, protein powders, and plant-based milks; "Snacks" covers snacks, sweets, and other drinks).
 - "emoji": The single most fitting food emoji for this item (e.g. 🌯 for a burrito, 🍕 for pizza, 🥗 for a salad, ☕ for a latte).
 `;
 }
