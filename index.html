@@ -111,6 +111,7 @@
             padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #334155;
         }
         .menu-item:hover { background: #f1f5f9; }
+        .swipe-row { touch-action: pan-y; -webkit-user-select: none; user-select: none; }
         #more-menu.is-sheet {
             left: 0.75rem; right: 0.75rem; width: auto; max-width: 28rem; margin-inline: auto;
             bottom: calc(4.25rem + env(safe-area-inset-bottom));
@@ -1784,7 +1785,8 @@
                 activeCategory: 'All',
                 weighIns: [],
                 onboarded: false,
-                microsEnabled: false
+                microsEnabled: false,
+                hiddenFoodIds: []
             };
         }
 
@@ -1855,6 +1857,7 @@
                 customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
                 logsByDate: parsed.logsByDate || {},
                 weighIns: Array.isArray(parsed.weighIns) ? parsed.weighIns : [],
+                hiddenFoodIds: Array.isArray(parsed.hiddenFoodIds) ? parsed.hiddenFoodIds : [],
                 // Saved data from before onboarding existed belongs to an existing user.
                 onboarded: parsed.onboarded !== false
             };
@@ -2005,11 +2008,12 @@
             (payload?.weighIns || []).forEach(w => { records[`k:${w.date}`] = w; });
             Object.entries(payload?.profile || {}).forEach(([key, value]) => { records[`p:${key}`] = { value }; });
             SYNCED_SETTINGS.forEach(key => { if (payload?.[key] !== undefined) records[`s:${key}`] = { value: payload[key] }; });
+            (payload?.hiddenFoodIds || []).forEach(id => { records[`h:${id}`] = { hidden: true }; });
             return records;
         }
 
         function fromSyncRecords(records, local, remote) {
-            const out = { ...remote, ...local, logsByDate: {}, customFoods: [], weighIns: [], profile: {} };
+            const out = { ...remote, ...local, logsByDate: {}, customFoods: [], weighIns: [], profile: {}, hiddenFoodIds: [] };
             const dayFor = date => (out.logsByDate[date] ||= { meals: createEmptyMeals(), waterCups: 0 });
             Object.entries(records).forEach(([key, rec]) => {
                 const id = key.slice(2);
@@ -2019,6 +2023,7 @@
                 else if (key.startsWith('k:')) out.weighIns.push(rec);
                 else if (key.startsWith('p:')) out.profile[id] = rec.value;
                 else if (key.startsWith('s:')) out[id] = rec.value;
+                else if (key.startsWith('h:')) out.hiddenFoodIds.push(id);
             });
             const entryTime = e => e.addedAt || getTimestampFromId(e.uid);
             Object.values(out.logsByDate).forEach(day => Object.values(day.meals).forEach(list => list.sort((a, b) => entryTime(a) - entryTime(b))));
@@ -2559,7 +2564,7 @@
             const picks = [
                 ...getRecentFoods().map(r => r.food),
                 ...STARTER_PICK_IDS.map(id => DEFAULT_FOOD_DB.find(f => f.id === id))
-            ].filter(f => f && !seen.has(f.id) && seen.add(f.id)).slice(0, 8);
+            ].filter(f => f && !isFoodHidden(f.id) && !seen.has(f.id) && seen.add(f.id)).slice(0, 8);
             const slot = MEAL_SLOTS.find(s => s.key === getActiveMealSlot());
             const isToday = state.activeDate === getTodayISO();
 
@@ -3196,8 +3201,104 @@
             state.waterCups = 5;
         }
 
+        // Deleted foods: custom ones are removed outright, built-ins are hidden (restorable). Both ids stay
+        // listed here so Recent doesn't bring a food back from past logs.
+        function isFoodHidden(foodId) {
+            return state.hiddenFoodIds.includes(foodId);
+        }
+
         function getAllFoods() {
-            return [...state.customFoods, ...DEFAULT_FOOD_DB];
+            return [...state.customFoods, ...DEFAULT_FOOD_DB].filter(f => !isFoodHidden(f.id));
+        }
+
+        function deleteFood(foodId) {
+            const customIndex = state.customFoods.findIndex(f => f.id === foodId);
+            const custom = customIndex >= 0 ? state.customFoods[customIndex] : null;
+            const food = custom || DEFAULT_FOOD_DB.find(f => f.id === foodId) || recentOnlyFoods.get(foodId);
+            if (!food) return;
+            if (custom) state.customFoods.splice(customIndex, 1);
+            if (!isFoodHidden(foodId)) state.hiddenFoodIds.push(foodId);
+            saveState();
+            recalculateAndRender();
+            showToast(`Deleted "${shortFoodName(food.name)}"`, {
+                actionLabel: 'Undo',
+                onAction: () => {
+                    state.hiddenFoodIds = state.hiddenFoodIds.filter(id => id !== foodId);
+                    if (custom && !state.customFoods.some(f => f.id === foodId)) {
+                        state.customFoods.splice(Math.min(customIndex, state.customFoods.length), 0, custom);
+                    }
+                    saveState();
+                    recalculateAndRender();
+                }
+            });
+        }
+
+        function restoreHiddenFoods() {
+            const builtInIds = new Set(DEFAULT_FOOD_DB.map(f => f.id));
+            const count = state.hiddenFoodIds.filter(id => builtInIds.has(id)).length;
+            state.hiddenFoodIds = state.hiddenFoodIds.filter(id => !builtInIds.has(id));
+            saveState();
+            recalculateAndRender();
+            showToast(`Restored ${count} built-in food${count === 1 ? '' : 's'}`);
+        }
+
+        // Swipe a food row left to reveal Delete. Vertical drags are left to the list's scrolling.
+        const SWIPE_OPEN_PX = 80;
+        function initFoodSwipe() {
+            const list = document.getElementById('food-db-list');
+            let drag = null;
+            let openRow = null;
+            let suppressClickUntil = 0;
+            const setOffset = (row, x, animate) => {
+                const content = row.querySelector('.swipe-content');
+                content.style.transition = animate ? 'transform 0.2s ease' : 'none';
+                content.style.transform = x ? `translateX(${x}px)` : '';
+            };
+            const closeOpenRow = () => {
+                if (openRow?.isConnected) setOffset(openRow, 0, true);
+                openRow = null;
+            };
+
+            list.addEventListener('pointerdown', e => {
+                const row = e.target.closest('.swipe-row');
+                if (openRow && openRow !== row) closeOpenRow();
+                if (!row || e.target.closest('input, .swipe-delete')) return;
+                drag = { row, id: e.pointerId, x: e.clientX, y: e.clientY, start: openRow === row ? -SWIPE_OPEN_PX : 0, active: false };
+            });
+            list.addEventListener('pointermove', e => {
+                if (!drag || e.pointerId !== drag.id) return;
+                const dx = e.clientX - drag.x;
+                const dy = e.clientY - drag.y;
+                if (!drag.active) {
+                    if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+                        drag = null;
+                        return;
+                    }
+                    if (Math.abs(dx) < 10) return;
+                    drag.active = true;
+                    drag.row.setPointerCapture(e.pointerId);
+                }
+                setOffset(drag.row, Math.max(-SWIPE_OPEN_PX * 1.5, Math.min(0, drag.start + dx)), false);
+            });
+            const endDrag = e => {
+                if (!drag || e.pointerId !== drag.id) return;
+                if (drag.active) {
+                    const opened = drag.start + (e.clientX - drag.x) < -SWIPE_OPEN_PX / 2;
+                    setOffset(drag.row, opened ? -SWIPE_OPEN_PX : 0, true);
+                    openRow = opened ? drag.row : null;
+                    suppressClickUntil = Date.now() + 350;
+                }
+                drag = null;
+            };
+            list.addEventListener('pointerup', endDrag);
+            list.addEventListener('pointercancel', endDrag);
+            // A drag shouldn't also count as tapping Add.
+            list.addEventListener('click', e => {
+                if (Date.now() < suppressClickUntil) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }, true);
         }
 
         /**************************************************************
@@ -3376,7 +3477,7 @@
             const latest = new Map(); // foodId -> { food, at, kind }
 
             const consider = (food, at, kind) => {
-                if (!food || !at) return;
+                if (!food || !at || isFoodHidden(food.id)) return;
                 const prev = latest.get(food.id);
                 if (!prev || at > prev.at) latest.set(food.id, { food, at, kind });
             };
@@ -4049,14 +4150,18 @@
                     <div class="p-6 text-center text-slate-400 text-xs">
                         ${isRecent && !query
                             ? 'Nothing here yet. Foods you log or add will show up here.'
-                            : `No vegetarian foods matching "${query}". Try <strong>Describe meal</strong> or <strong>Custom food</strong> above.`}
+                            : `No vegetarian foods matching "${escapeHtml(query)}". Try <strong>Describe meal</strong> or <strong>Custom food</strong> above.`}
                     </div>
-                `;
+                ` + renderHiddenFoodsNote();
                 return;
             }
 
             listEl.innerHTML = filtered.map(food => `
-                <div class="p-2.5 hover:bg-white transition flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="swipe-row relative overflow-hidden">
+                <button onclick="deleteFood('${food.id}')" tabindex="-1" class="swipe-delete absolute inset-y-0 right-0 w-20 bg-rose-600 text-white text-xs font-bold flex flex-col items-center justify-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+                <div class="swipe-content relative bg-white p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
                         <span class="w-8 h-8 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-base shrink-0 shadow-2xs">${escapeHtml(food.icon || '🌱')}</span>
                         <div class="min-w-0">
@@ -4084,7 +4189,15 @@
                         </button>
                     </div>
                 </div>
-            `).join('');
+                </div>
+            `).join('') + renderHiddenFoodsNote();
+        }
+
+        function renderHiddenFoodsNote() {
+            const builtInIds = new Set(DEFAULT_FOOD_DB.map(f => f.id));
+            const hidden = state.hiddenFoodIds.filter(id => builtInIds.has(id)).length;
+            if (!hidden) return '';
+            return `<div class="p-3 text-center text-[11px] text-slate-400">${hidden} built-in food${hidden === 1 ? '' : 's'} deleted · <button onclick="restoreHiddenFoods()" class="font-bold text-emerald-700 hover:underline">Restore</button></div>`;
         }
 
         function addFoodFromFinder(foodId) {
@@ -5278,6 +5391,7 @@
                 renderQuickAddHint();
                 renderGettingStarted();
             });
+            initFoodSwipe();
             const movedShakes = moveCustomShakesOnce();
             recalculateAndRender();
             if (movedShakes) showToast(`Moved ${movedShakes} custom food${movedShakes === 1 ? '' : 's'} into 🥤 Shakes`);
