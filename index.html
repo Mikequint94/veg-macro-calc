@@ -938,7 +938,7 @@
                         <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Food / Meal Name *</label>
                         <div class="flex gap-1.5">
                             <input id="cf-emoji" type="text" maxlength="8" value="🍽️" oninput="this.dataset.manual = '1'" aria-label="Food emoji" title="Auto-picked from the name. Tap to type your own." class="w-11 shrink-0 px-1 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-base text-center">
-                            <input id="cf-name" type="text" required placeholder="e.g., Bean & Cheese Burrito" oninput="autoPickCustomEmoji()" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium">
+                            <input id="cf-name" type="text" required placeholder="e.g., Bean & Cheese Burrito" oninput="autoPickCustomCategory(); autoPickCustomEmoji()" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium">
                         </div>
                     </div>
                     <div>
@@ -1019,7 +1019,7 @@
 
                 <div>
                     <label for="cf-category" class="block text-xs font-semibold uppercase text-slate-500 mb-1">Category</label>
-                    <select id="cf-category" onchange="autoPickCustomEmoji()" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-semibold">
+                    <select id="cf-category" onchange="this.dataset.manual = '1'; autoPickCustomEmoji()" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-semibold">
                         <option value="MealPrep">🥗 Meal Prep Dishes</option>
                         <option value="PlantPro">🌱 Plant Bases (Tofu/Seitan/TVP)</option>
                         <option value="Shakes">🥤 Shakes, Plant Milks & Protein Powders</option>
@@ -3296,6 +3296,44 @@
             [/pumpkin|squash/, '🎃']
         ];
 
+        // One-time move of custom foods saved before the Shakes category existed.
+        const SHAKE_NAME_PATTERN = /\b(shakes?|smoothies?|protein (powder|drink)|whey|casein|(soy|oat|almond|cashew|pea|coconut|rice|hemp|plant)[ -]?milk|oatly|silk|ripple|orgain|premier protein)\b/i;
+        function moveCustomShakesOnce() {
+            if (state.shakesCategoryMigrated) return 0;
+            let moved = 0;
+            state.customFoods.forEach(food => {
+                if (food.category !== 'Shakes' && SHAKE_NAME_PATTERN.test(food.name || '')) {
+                    food.category = 'Shakes';
+                    moved++;
+                }
+            });
+            state.shakesCategoryMigrated = true;
+            return moved;
+        }
+
+        // Ordered: dishes and drinks first so "bean & cheese burrito" lands in Meal Prep, not Legumes.
+        const CATEGORY_NAME_RULES = [
+            ['Shakes', SHAKE_NAME_PATTERN],
+            ['MealPrep', /\b(burritos?|bowls?|curry|pizza|sandwich|wraps?|tacos?|lasagna|soups?|salads?|stir[ -]?fry|chili|quesadillas?|sushi|omelet+e?|scramble|dahl|dal|masala|ramen|casserole|stew|toast)\b/i],
+            ['Snacks', /\b(chips?|cookies?|bars?|chocolate|candy|ice cream|cake|donuts?|popcorn|pretzels?|coffee|latte|tea|juice|soda|kombucha|beer|wine|honey|jam|syrup|gummies)\b/i],
+            ['PlantPro', /\b(tofu|tempeh|seitan|tvp|edamame|beyond|impossible|plant[ -]based|nutritional yeast|nooch)\b/i],
+            ['Legumes', /\b(beans?|lentils?|chickpeas?|hummus|peas|falafel)\b/i],
+            ['FatsSeeds', /\b(nuts?|peanuts?|almonds?|walnuts?|cashews?|pistachios?|pecans?|seeds?|chia|flax|hemp|tahini|avocado|oil|nut butter|peanut butter)\b/i],
+            ['DairyEggs', /\b(eggs?|cheese|yogh?urt|skyr|kefir|paneer|cottage|ricotta|milk|cream|butter)\b/i],
+            ['Grains', /\b(rice|bread|bagels?|pasta|spaghetti|noodles?|oats?|oatmeal|quinoa|tortillas?|cereal|granola|couscous|barley|farro|pancakes?|waffles?|muffins?|naan|pita|crackers?)\b/i],
+            ['Produce', /\b(apples?|bananas?|\w*berr(y|ies)|grapes?|oranges?|mangos?|pineapple|melon|peach(es)?|pears?|fruit|spinach|kale|broccoli|carrots?|peppers?|tomato(es)?|potato(es)?|lettuce|veg(gie|etable)s?|cucumber|zucchini|mushrooms?|onions?|squash|cauliflower|corn)\b/i]
+        ];
+
+        function suggestFoodCategory(name) {
+            return CATEGORY_NAME_RULES.find(([, pattern]) => pattern.test(name || ''))?.[0] || null;
+        }
+
+        function autoPickCustomCategory() {
+            const select = document.getElementById('cf-category');
+            if (select.dataset.manual === '1') return;
+            select.value = suggestFoodCategory(document.getElementById('cf-name').value) || 'MealPrep';
+        }
+
         const CATEGORY_EMOJI = {
             PlantPro: '🌱', DairyEggs: '🧀', Legumes: '🫘', Grains: '🍚',
             Produce: '🥦', FatsSeeds: '🥜', MealPrep: '🍽️', Snacks: '🍿', Shakes: '🥤'
@@ -4496,6 +4534,7 @@
             document.getElementById('custom-food-modal').classList.add('hidden');
             document.getElementById('custom-food-form').reset();
             delete document.getElementById('cf-emoji').dataset.manual;
+            delete document.getElementById('cf-category').dataset.manual;
             delete document.getElementById('cf-kcal').dataset.manual;
         }
 
@@ -4885,8 +4924,7 @@
                     f: 5,
                     fiber: 2,
                     isVegetarian: true,
-                    vegetarianNote: 'Manual review required: please verify ingredients from packaging.',
-                    suggestedCategory: 'PlantPro'
+                    vegetarianNote: 'Manual review required: please verify ingredients from packaging.'
                 });
             }
         }
@@ -4909,9 +4947,8 @@
             document.getElementById('scan-res-servings-to-log').value = 1;
             document.getElementById('scan-res-save-catalog').checked = true;
 
-            if (data.suggestedCategory) {
-                document.getElementById('scan-res-category').value = data.suggestedCategory;
-            }
+            document.getElementById('scan-res-category').value =
+                data.suggestedCategory || suggestFoodCategory(data.foodName) || 'PlantPro';
             document.getElementById('scan-res-emoji').value = (data.emoji || '').trim()
                 || suggestFoodEmoji(data.foodName, data.suggestedCategory);
 
@@ -5241,7 +5278,9 @@
                 renderQuickAddHint();
                 renderGettingStarted();
             });
+            const movedShakes = moveCustomShakesOnce();
             recalculateAndRender();
+            if (movedShakes) showToast(`Moved ${movedShakes} custom food${movedShakes === 1 ? '' : 's'} into 🥤 Shakes`);
             setView(location.hash.slice(1) || 'today', false);
             if (!state.onboarded) startOnboarding();
             if ('serviceWorker' in navigator && location.protocol === 'https:') {
