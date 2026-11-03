@@ -1118,6 +1118,13 @@
                     <p id="sync-link-sent-msg" class="hidden text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
                         Check your inbox and open the link in this browser to finish signing in.
                     </p>
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <div class="text-xs font-bold text-slate-700">Signed in on another device?</div>
+                        <p class="text-[11px] text-slate-500">Get a sign-in code there (Account &amp; sync → Get a sign-in code) and enter it here. Use this for the iPhone Home Screen app, where email links don't work.</p>
+                        <div class="flex gap-2">
+                            <input id="sync-link-code-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="ABCD-EFGH" class="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-base font-bold tracking-[0.2em] text-center uppercase">
+                            <button id="sync-link-code-btn" type="button" onclick="connectWithLinkCode()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition">Connect</button>
+                        </div>
                     </div>
                 </form>
 
@@ -1134,6 +1141,17 @@
                         </button>
                     </div>
                     <p class="text-[11px] text-slate-400">Signing out keeps a copy of your data on this device.</p>
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <div class="text-xs font-bold text-slate-700">Add another device</div>
+                        <p class="text-[11px] text-slate-500">Installing on your Home Screen or using another device? Get a code and enter it there to sign in. No email needed.</p>
+                        <button id="link-code-btn" type="button" onclick="showLinkCode()" class="w-full py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-key text-sky-600"></i> Get a sign-in code
+                        </button>
+                        <div id="link-code-box" class="hidden p-3 rounded-xl bg-sky-50 border border-sky-200 text-center">
+                            <div id="link-code-value" class="text-2xl font-extrabold tracking-[0.2em] text-slate-900"></div>
+                            <div id="link-code-expiry" class="text-[11px] text-sky-700 mt-0.5"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2201,6 +2219,7 @@
             }
             renderSyncModalState();
             document.getElementById('sync-link-sent-msg').classList.add('hidden');
+            document.getElementById('link-code-box').classList.add('hidden');
             document.getElementById('sync-modal').classList.remove('hidden');
         }
 
@@ -2231,6 +2250,65 @@
             const email = document.getElementById('sync-email-input').value.trim();
             const sent = await requestSignInLink(email, document.getElementById('sync-send-link-btn'));
             if (sent) document.getElementById('sync-link-sent-msg').classList.remove('hidden');
+        }
+
+        /* Link codes: a signed-in device gets a short single-use code; entering it on another device signs that
+           device in without an email (iPhone Home Screen apps can't receive email links). See supabase/functions/link-device. */
+        async function callLinkDevice(body) {
+            const { data, error } = await supabaseClient.functions.invoke('link-device', { body });
+            if (error) {
+                const detail = await error.context?.json?.().catch(() => null);
+                throw new Error(detail?.error || error.message || 'Could not reach the server');
+            }
+            return data;
+        }
+
+        function formatLinkCode(code) {
+            return code.length === 8 ? `${code.slice(0, 4)}-${code.slice(4)}` : code;
+        }
+
+        async function showLinkCode() {
+            const button = document.getElementById('link-code-btn');
+            button.disabled = true;
+            try {
+                const { code, expiresAt } = await callLinkDevice({ action: 'create' });
+                document.getElementById('link-code-value').textContent = formatLinkCode(code);
+                const until = new Date(expiresAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                document.getElementById('link-code-expiry').textContent = `Works once, until ${until}`;
+                document.getElementById('link-code-box').classList.remove('hidden');
+            } catch (err) {
+                showToast(`Could not get a code: ${err.message}`);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function redeemLinkCode(code, buttonEl) {
+            if (!supabaseClient) {
+                showToast('Cloud sync is unavailable (could not load Supabase)');
+                return false;
+            }
+            buttonEl.disabled = true;
+            try {
+                const { tokenHash } = await callLinkDevice({ action: 'redeem', code });
+                const { error } = await supabaseClient.auth.verifyOtp({ token_hash: tokenHash, type: 'magiclink' });
+                if (error) throw error;
+                showToast('Signed in. Bringing over your data…');
+                return true;
+            } catch (err) {
+                showToast(err.message);
+                return false;
+            } finally {
+                buttonEl.disabled = false;
+            }
+        }
+
+        async function connectWithLinkCode() {
+            const input = document.getElementById('sync-link-code-input');
+            if (await redeemLinkCode(input.value, document.getElementById('sync-link-code-btn'))) {
+                input.value = '';
+                closeSyncModal();
+            }
         }
 
         async function syncNow() {
@@ -2968,7 +3046,8 @@
                 return heading('What’s your goal?', 'Welcome to NutriPulse! Answer a few quick questions and we’ll work out your daily calories and protein.')
                     + `<div class="space-y-3">${ONBOARDING_GOALS.map(g => renderOnboardingChoice({
                         selected: p.goal === g.key, onclick: `onboardingPick('goal', '${g.key}')`, icon: g.icon, title: g.title, desc: g.desc
-                    })).join('')}</div>`;
+                    })).join('')}</div>`
+                    + renderOnboardingLinkCode();
             }
 
             if (step === 'body') {
@@ -3070,6 +3149,10 @@
             }
             if (!onboardingLinkSent) {
                 return heading('Save your progress', 'Use your email to back up your logs and use NutriPulse on your phone and laptop. No password needed.')
+                    + (isIosBrowserTab() ? `<p class="mb-4 text-xs text-sky-900 bg-sky-50 border border-sky-200 rounded-xl p-3 flex gap-2">
+                        <i class="fa-solid fa-mobile-screen mt-0.5"></i>
+                        <span>Want NutriPulse on your Home Screen? Sign in here in Safari first. Then add it (Share <i class="fa-solid fa-arrow-up-from-bracket"></i> → Add to Home Screen), and when it opens, enter a sign-in code from ⋯ More → Account &amp; sync.</span>
+                    </p>` : '')
                     + `<form onsubmit="onboardingSendLink(event)" class="space-y-3">
                         <input id="ob-email" type="email" required autocomplete="email" value="${escapeHtml(onboardingEmail)}" placeholder="you@example.com" class="ob-input">
                         <button id="ob-send-btn" type="submit" class="w-full py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-base font-bold transition flex items-center justify-center gap-2"><i class="fa-solid fa-envelope"></i> Email me a sign-in link</button>
@@ -3097,6 +3180,40 @@
                 <div class="flex-1 px-5 sm:px-7 pt-6 pb-6 flex flex-col" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom));">${renderOnboardingStep(step)}</div>
             `;
             document.getElementById('onboarding-modal').scrollTop = 0;
+        }
+
+        let onboardingShowLinkCode = false;
+
+        // On iPhone, Safari and a Home Screen app keep separate data, and email links always open in Safari.
+        function isIosBrowserTab() {
+            const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const standalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            return ios && !standalone;
+        }
+
+        function renderOnboardingLinkCode() {
+            if (!supabaseClient || cloudUser) return '';
+            if (!onboardingShowLinkCode) {
+                return `<button type="button" onclick="onboardingShowLinkCode = true; renderOnboarding()" class="mt-5 w-full p-3 rounded-2xl border border-sky-200 bg-sky-50 text-left flex items-center gap-3">
+                    <i class="fa-solid fa-key text-sky-600"></i>
+                    <span class="text-sm"><span class="block font-bold text-slate-900">Already signed in on another device?</span><span class="text-slate-500">Enter a sign-in code to bring your data here.</span></span>
+                </button>`;
+            }
+            return `<form onsubmit="onboardingRedeemLinkCode(event)" class="mt-5 p-3 rounded-2xl border border-sky-200 bg-sky-50 space-y-2">
+                <p class="text-xs text-slate-600">On your other device, open ⋯ More → Account &amp; sync → <b>Get a sign-in code</b>, then enter it here.</p>
+                <div class="flex gap-2">
+                    <input id="ob-link-code" type="text" required autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="ABCD-EFGH" class="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-slate-200 bg-white outline-none text-lg font-bold tracking-[0.2em] text-center uppercase">
+                    <button id="ob-link-code-btn" type="submit" class="px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Connect</button>
+                </div>
+            </form>`;
+        }
+
+        async function onboardingRedeemLinkCode(e) {
+            e.preventDefault();
+            if (await redeemLinkCode(document.getElementById('ob-link-code').value, document.getElementById('ob-link-code-btn'))) {
+                onboardingShowLinkCode = false;
+                finishOnboarding();
+            }
         }
 
         async function onboardingSendLink(e) {
