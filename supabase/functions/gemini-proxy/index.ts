@@ -7,7 +7,9 @@ const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://mikequint94
     .split(',')
     .map(o => o.trim())
     .filter(Boolean);
-const MODEL = 'gemini-3-flash-preview';
+// Tried in order when a model is overloaded or out of quota (the free tier allows only ~20 requests a day
+// on the first one). The "-latest" aliases follow Google's current stable models.
+const MODELS = ['gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-flash-lite-latest'];
 const USER_DAILY_LIMIT = Number(Deno.env.get('AI_USER_DAILY_LIMIT') ?? 25);
 const GLOBAL_DAILY_LIMIT = Number(Deno.env.get('AI_GLOBAL_DAILY_LIMIT') ?? 400);
 const MAX_IMAGE_BASE64_CHARS = 4_000_000; // about 3 MB of image
@@ -152,19 +154,24 @@ Deno.serve(async (req) => {
             throw new HttpError(429, 'AI scanning has hit its daily limit for everyone. Try again tomorrow.');
         }
 
-        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
-            body: JSON.stringify({
-                contents: [{ role: 'user', parts }],
-                generationConfig: { responseMimeType: 'application/json', responseSchema: RESPONSE_SCHEMA }
-            })
-        });
-        if (!geminiRes.ok) {
-            console.error('Gemini error', geminiRes.status, await geminiRes.text());
-            throw new HttpError(502, geminiRes.status === 429 ? 'The AI service is busy. Try again in a minute.' : 'The AI service had a problem. Try again.');
+        let geminiRes: Response | undefined;
+        for (const model of MODELS) {
+            geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
+                body: JSON.stringify({
+                    contents: [{ role: 'user', parts }],
+                    generationConfig: { responseMimeType: 'application/json', responseSchema: RESPONSE_SCHEMA }
+                })
+            });
+            if (geminiRes.ok || ![429, 500, 503].includes(geminiRes.status)) break;
+            console.warn(`Gemini ${model} returned ${geminiRes.status}; trying the next model`);
         }
-        const geminiJson = await geminiRes.json();
+        if (!geminiRes!.ok) {
+            console.error('Gemini error', geminiRes!.status, await geminiRes!.text());
+            throw new HttpError(502, geminiRes!.status === 429 ? 'The AI service is busy. Try again in a minute.' : 'The AI service had a problem. Try again.');
+        }
+        const geminiJson = await geminiRes!.json();
         const text = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!text) throw new HttpError(502, 'The AI could not read that. Try a clearer photo or more detail.');
 
