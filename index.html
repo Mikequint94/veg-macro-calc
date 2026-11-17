@@ -2092,7 +2092,9 @@
         function applyCloudState(nextState) {
             applyingCloudState = true;
             try {
-                hydrateState({ ...nextState, activeDate: state.activeDate });
+                // Keep this device's view: the day being viewed and the food-category tab aren't synced,
+                // so a background sync (e.g. right after adding a food) mustn't reset them.
+                hydrateState({ ...nextState, activeDate: state.activeDate, activeCategory: state.activeCategory });
                 syncInputsFromState();
                 syncDateBarUI();
                 recalculateAndRender();
